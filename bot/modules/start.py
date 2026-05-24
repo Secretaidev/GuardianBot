@@ -236,7 +236,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     ),
                     InlineKeyboardButton(
                         text=f"📢 {sc('support')}",
-                        url="https://t.me/GuardianBotSupport",
+                        url="https://t.me/RoseManagementBot",
                     ),
                 ],
             ]
@@ -420,7 +420,7 @@ async def callback_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                     ),
                     InlineKeyboardButton(
                         text=f"📢 {sc('support')}",
-                        url="https://t.me/GuardianBotSupport",
+                        url="https://t.me/RoseManagementBot",
                     ),
                 ],
             ]
