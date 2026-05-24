@@ -1,0 +1,201 @@
+# ─────────────────────────────────────────
+# 🐍 Python
+# ─────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# ─────────────────────────────────────────
+# 🔐 Secrets & Environment
+# ─────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+*.env
+secrets.json
+config.local.py
+
+# ─────────────────────────────────────────
+# 🗃️ Database
+# ─────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ─────────────────────────────────────────
+# 📝 Logs
+# ─────────────────────────────────────────
+*.log
+logs/
+log/
+
+# ─────────────────────────────────────────
+# 🐋 Docker
+# ─────────────────────────────────────────
+.docker/
+
+# ─────────────────────────────────────────
+# 💻 IDEs & Editors
+# ─────────────────────────────────────────
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm / JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*#
+.#*
+\#*#
+
+# Spyder
+.spyderproject.db
+.spyproject
+
+# Rope
+.ropeproject
+
+# ─────────────────────────────────────────
+# 🖥️ Operating System
+# ─────────────────────────────────────────
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# ─────────────────────────────────────────
+# 🐍 Virtual Environments
+# ─────────────────────────────────────────
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+.virtualenv/
+.pyenv/
+Pipfile.lock
+poetry.lock
+
+# ─────────────────────────────────────────
+# 📦 Node (if any frontend tooling)
+# ─────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─────────────────────────────────────────
+# ☁️ Deployment Platform Files
+# ─────────────────────────────────────────
+.railway/
+.render/
+
+# ─────────────────────────────────────────
+# 🗂️ Misc
+# ─────────────────────────────────────────
+*.bak
+*.tmp
+*.temp
+.cache/
+tmp/
+temp/
