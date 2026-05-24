@@ -16,12 +16,6 @@
   <img src="https://img.shields.io/badge/deploy-render-46E3B7?style=for-the-badge&logo=render&logoColor=white" alt="Render"/>
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/modules-20+-ff6b6b?style=flat-square" alt="Modules"/>
-  <img src="https://img.shields.io/badge/commands-70+-ffd93d?style=flat-square" alt="Commands"/>
-  <img src="https://img.shields.io/badge/style-small%20caps-9b59b6?style=flat-square" alt="Style"/>
-</p>
-
 ---
 
 ## ⚡ What is GuardianBot?
