@@ -18,7 +18,7 @@ import motor.motor_asyncio
 from pymongo import ASCENDING, DESCENDING, IndexModel
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
-from bot.config import Config  # MONGO_URI lives here
+from bot.config import MONGO_URI
 
 logger = logging.getLogger(__name__)
 
@@ -119,8 +119,7 @@ async def connect_db() -> None:
     Raises SystemExit on fatal connection errors.
     """
     global _client, db  # noqa: PLW0603
-
-    mongo_uri: str = Config.MONGO_URI
+    mongo_uri = MONGO_URI
     if not mongo_uri:
         logger.critical("MONGO_URI is not set in config. Aborting.")
         raise SystemExit(1)
@@ -129,7 +128,10 @@ async def connect_db() -> None:
     try:
         _client = motor.motor_asyncio.AsyncIOMotorClient(
             mongo_uri,
-            serverSelectionTimeoutMS=10_000,  # 10 s connection timeout
+            serverSelectionTimeoutMS=10_000,
+            maxPoolSize=50,
+            minPoolSize=5,
+            retryWrites=True,
         )
         # Force a real connection attempt so we catch errors early
         await _client.admin.command("ping")

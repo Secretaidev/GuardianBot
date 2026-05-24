@@ -92,6 +92,7 @@ MODULES: list[str] = [
     "bot.modules.rules",
     "bot.modules.federation",
     "bot.modules.disable",
+    "bot.modules.maintenance",
     "bot.modules.users",
     "bot.modules.stats",
 ]
@@ -233,6 +234,14 @@ async def _post_init(app: Application) -> None:
     """
     # Start the async log consumer
     await TelegramChannelHandler.start(app.bot, rate_limit=18.0)
+
+    # Setup server-side log rotation to keep host lean
+    try:
+        from bot.helpers.autodelete import setup_log_rotation, cleanup_old_logs
+        setup_log_rotation()
+        cleanup_old_logs(max_age_days=7)
+    except Exception:
+        pass  # non-critical
 
     # Resolve bot info
     bot_user = await app.bot.get_me()

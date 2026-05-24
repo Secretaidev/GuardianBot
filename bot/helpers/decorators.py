@@ -197,3 +197,21 @@ def bot_admin_required(func: Callable) -> Callable:
         return await func(update, context, *args, **kwargs)
 
     return wrapper
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# @owner_everywhere  (god-mode — owner inherits all bot powers)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def owner_everywhere(func: Callable) -> Callable:
+    """Owner can do ANYTHING in any chat where the bot has admin rights.
+    Skips all permission checks. The bot's power = owner's power."""
+    @functools.wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        user = update.effective_user
+        if user and user.id == OWNER_ID:
+            # god-mode: skip every check, just run it
+            return await func(update, context, *args, **kwargs)
+        return await func(update, context, *args, **kwargs)
+
+    return wrapper

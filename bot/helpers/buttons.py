@@ -1,16 +1,7 @@
 """
-bot/helpers/buttons.py
-ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — Advanced inline keyboard builder utilities.
-
-Provides:
-  - build_menu()          — Generic grid-layout keyboard builder
-  - back_button()         — Standard "back" button factory
-  - paginate()            — Pagination button row generator
-  - confirm_keyboard()    — Yes / No confirmation keyboard
-  - main_menu_keyboard()  — Pre-built /help main-menu keyboard
-  - module_help_keyboard()— Pre-built per-module help keyboard with back button
+ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — Inline keyboard builders with nested category sub-menus.
+Crafted by 𝐒𝐄𝐂𝐑𝐄𝐓
 """
-
 from __future__ import annotations
 
 import math
@@ -21,207 +12,144 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from bot.fonts import sc
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Generic grid builder
-# ─────────────────────────────────────────────────────────────────────────────
+# ── generic grid builder ─────────────────────────────────────────────────────
 
 def build_menu(
-    buttons: List[InlineKeyboardButton],
+    buttons: list[InlineKeyboardButton],
     n_cols: int,
-    header_buttons: Optional[List[InlineKeyboardButton]] = None,
-    footer_buttons: Optional[List[InlineKeyboardButton]] = None,
-) -> List[List[InlineKeyboardButton]]:
-    """
-    Arrange *buttons* into rows of *n_cols* columns.
-
-    Optionally prepend *header_buttons* as a standalone first row and append
-    *footer_buttons* as a standalone last row.
-
-    Returns the raw ``[[InlineKeyboardButton, ...], ...]`` list that can be
-    passed directly to :class:`telegram.InlineKeyboardMarkup`.
-
-    Example::
-
-        btns = [InlineKeyboardButton(text=str(i), callback_data=str(i)) for i in range(6)]
-        menu = build_menu(btns, n_cols=3)
-        # → [[btn0, btn1, btn2], [btn3, btn4, btn5]]
-        markup = InlineKeyboardMarkup(menu)
-    """
-    rows: List[List[InlineKeyboardButton]] = []
-
+    header_buttons: list[InlineKeyboardButton] | None = None,
+    footer_buttons: list[InlineKeyboardButton] | None = None,
+) -> list[list[InlineKeyboardButton]]:
+    """Chunk buttons into rows of n_cols."""
+    rows: list[list[InlineKeyboardButton]] = []
     if header_buttons:
         rows.append(header_buttons)
-
-    # Split the flat button list into chunks of n_cols
     for i in range(0, len(buttons), n_cols):
         rows.append(buttons[i : i + n_cols])
-
     if footer_buttons:
         rows.append(footer_buttons)
-
     return rows
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Standard back button
-# ─────────────────────────────────────────────────────────────────────────────
-
 def back_button(callback_data: str) -> InlineKeyboardButton:
-    """
-    Return a single "🔙 ʙᴀᴄᴋ" :class:`telegram.InlineKeyboardButton` that
-    triggers *callback_data* when pressed.
-    """
-    return InlineKeyboardButton(
-        text=f"🔙 {sc('back')}",
-        callback_data=callback_data,
-    )
+    return InlineKeyboardButton(text=f"🔙 {sc('back')}", callback_data=callback_data)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Pagination
-# ─────────────────────────────────────────────────────────────────────────────
+def close_button() -> InlineKeyboardButton:
+    return InlineKeyboardButton(text=f"❌ {sc('close')}", callback_data="help:close")
+
+
+# ── pagination ───────────────────────────────────────────────────────────────
 
 def paginate(
-    items: List[Any],
-    page: int,
-    page_size: int,
-    callback_prefix: str,
-) -> List[InlineKeyboardButton]:
-    """
-    Build a row of pagination navigation buttons for *items*.
-
-    Args:
-        items:           The full collection being paginated.
-        page:            The current 0-based page index.
-        page_size:       How many items appear per page.
-        callback_prefix: String prefix for callback data.
-                         Buttons emit ``{callback_prefix}:{page_number}``.
-
-    Returns a list of up to three buttons: [⬅ ᴘʀᴇᴠ] [Page x/y] [ɴᴇxᴛ ➡].
-    The current-page indicator button is non-interactive (callback_data=".").
-
-    Example::
-
-        btns = paginate(my_list, page=1, page_size=5, callback_prefix="page")
-        # → [⬅ ᴘʀᴇᴠ btn, "2/4" btn, ɴᴇxᴛ ➡ btn]
-    """
+    items: list[Any], page: int, page_size: int, callback_prefix: str,
+) -> list[InlineKeyboardButton]:
     total_pages = max(1, math.ceil(len(items) / page_size))
-    nav_buttons: List[InlineKeyboardButton] = []
-
-    # Previous page
+    nav: list[InlineKeyboardButton] = []
     if page > 0:
-        nav_buttons.append(
-            InlineKeyboardButton(
-                text=f"⬅ {sc('prev')}",
-                callback_data=f"{callback_prefix}:{page - 1}",
-            )
-        )
-
-    # Current page indicator  (non-clickable — callback "." is a no-op)
-    nav_buttons.append(
-        InlineKeyboardButton(
-            text=f"{page + 1}/{total_pages}",
-            callback_data=".",
-        )
-    )
-
-    # Next page
+        nav.append(InlineKeyboardButton(f"⬅ {sc('prev')}", callback_data=f"{callback_prefix}:{page - 1}"))
+    nav.append(InlineKeyboardButton(f"{page + 1}/{total_pages}", callback_data="."))
     if page < total_pages - 1:
-        nav_buttons.append(
-            InlineKeyboardButton(
-                text=f"{sc('next')} ➡",
-                callback_data=f"{callback_prefix}:{page + 1}",
-            )
-        )
-
-    return nav_buttons
+        nav.append(InlineKeyboardButton(f"{sc('next')} ➡", callback_data=f"{callback_prefix}:{page + 1}"))
+    return nav
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Yes / No confirmation keyboard
-# ─────────────────────────────────────────────────────────────────────────────
+# ── yes / no confirm ─────────────────────────────────────────────────────────
 
-def confirm_keyboard(
-    yes_callback: str,
-    no_callback: str,
-) -> InlineKeyboardMarkup:
-    """
-    Return a two-button ✅ ʏᴇꜱ / ❌ ɴᴏ confirmation keyboard.
-
-    Args:
-        yes_callback: Callback data emitted when the user confirms.
-        no_callback:  Callback data emitted when the user cancels.
-    """
-    return InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(
-                    text=f"✅ {sc('yes')}",
-                    callback_data=yes_callback,
-                ),
-                InlineKeyboardButton(
-                    text=f"❌ {sc('no')}",
-                    callback_data=no_callback,
-                ),
-            ]
-        ]
-    )
+def confirm_keyboard(yes_callback: str, no_callback: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton(f"✅ {sc('yes')}", callback_data=yes_callback),
+        InlineKeyboardButton(f"❌ {sc('no')}", callback_data=no_callback),
+    ]])
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Pre-built /help navigation keyboards
-# ─────────────────────────────────────────────────────────────────────────────
+# ── category definitions ─────────────────────────────────────────────────────
 
-# All module names available in GuardianBot's help system
-_MODULES: List[str] = [
-    "ADMIN",
-    "BANS",
-    "MUTES",
-    "WARNS",
-    "WELCOME",
-    "FILTERS",
-    "NOTES",
-    "LOCKS",
-    "BLOCKLIST",
-    "ANTIFLOOD",
-    "REPORTS",
-    "PINS",
-    "PURGE",
-    "RULES",
-    "FEDERATION",
-]
+CATEGORIES = {
+    "mod": {
+        "label": f"⚔️ {sc('moderation')}",
+        "modules": [
+            ("🛡", "admin",   "ADMIN"),
+            ("🚫", "bans",    "BANS"),
+            ("🔇", "mutes",   "MUTES"),
+            ("⚠️", "warns",   "WARNS"),
+            ("📣", "reports", "REPORTS"),
+            ("📌", "pins",    "PINS"),
+            ("🗑", "purge",   "PURGE"),
+        ],
+    },
+    "auto": {
+        "label": f"🤖 {sc('automation')}",
+        "modules": [
+            ("👋", "welcome",   "WELCOME"),
+            ("🔍", "filters",   "FILTERS"),
+            ("📝", "notes",     "NOTES"),
+            ("🔒", "locks",     "LOCKS"),
+            ("🚷", "blocklist", "BLOCKLIST"),
+            ("🌊", "antiflood", "ANTIFLOOD"),
+        ],
+    },
+    "adv": {
+        "label": f"🌐 {sc('advanced')}",
+        "modules": [
+            ("📋", "rules",      "RULES"),
+            ("🌐", "federation", "FEDERATION"),
+            ("🔕", "disable",    "DISABLE"),
+        ],
+    },
+    "owner": {
+        "label": f"👑 {sc('owner')}",
+        "modules": [
+            ("📊", "stats",       "STATS"),
+            ("🔧", "maintenance", "MAINTENANCE"),
+            ("📡", "broadcast",   "BROADCAST"),
+        ],
+    },
+}
 
+# map MODULE_KEY -> category key for back navigation
+_MODULE_TO_CAT: dict[str, str] = {}
+for cat_key, cat_data in CATEGORIES.items():
+    for _, _, mod_key in cat_data["modules"]:
+        _MODULE_TO_CAT[mod_key] = cat_key
+
+
+# ── main help menu (3 categories + owner + close) ────────────────────────────
 
 def main_menu_keyboard() -> InlineKeyboardMarkup:
-    """
-    Build the main /help menu keyboard.
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(CATEGORIES["mod"]["label"],  callback_data="helpcat:mod"),
+            InlineKeyboardButton(CATEGORIES["auto"]["label"], callback_data="helpcat:auto"),
+        ],
+        [
+            InlineKeyboardButton(CATEGORIES["adv"]["label"],   callback_data="helpcat:adv"),
+            InlineKeyboardButton(CATEGORIES["owner"]["label"], callback_data="helpcat:owner"),
+        ],
+        [close_button()],
+    ])
 
-    Each module in ``_MODULES`` becomes a button arranged in a 3-column grid.
-    Pressing a button emits the callback ``help:MODULE_NAME``.
-    """
-    module_buttons: List[InlineKeyboardButton] = [
-        InlineKeyboardButton(
-            text=sc(name.lower()),
-            callback_data=f"help:{name}",
-        )
-        for name in _MODULES
+
+# ── category sub-menu ────────────────────────────────────────────────────────
+
+def category_keyboard(category: str) -> InlineKeyboardMarkup:
+    """Build the sub-menu for a given category key (mod/auto/adv/owner)."""
+    cat = CATEGORIES.get(category)
+    if not cat:
+        return InlineKeyboardMarkup([[back_button("help:main")]])
+
+    btns = [
+        InlineKeyboardButton(f"{emoji} {sc(name)}", callback_data=f"help:{key}")
+        for emoji, name, key in cat["modules"]
     ]
-
-    rows = build_menu(module_buttons, n_cols=3)
+    rows = build_menu(btns, n_cols=3, footer_buttons=[back_button("help:main")])
     return InlineKeyboardMarkup(rows)
 
 
+# ── per-module help keyboard (back goes to parent category) ──────────────────
+
 def module_help_keyboard(module_name: str) -> InlineKeyboardMarkup:
-    """
-    Build the per-module help keyboard.
-
-    Contains a single "🔙 ʙᴀᴄᴋ" button that returns the user to the main
-    help menu (callback data ``help:main``).
-
-    Args:
-        module_name: The module whose help page is currently being shown.
-                     (Not used in the keyboard itself, kept for symmetry.)
-    """
-    return InlineKeyboardMarkup(
-        [[back_button("help:main")]]
-    )
+    cat_key = _MODULE_TO_CAT.get(module_name, "mod")
+    return InlineKeyboardMarkup([
+        [back_button(f"helpcat:{cat_key}"), close_button()],
+    ])

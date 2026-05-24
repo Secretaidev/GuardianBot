@@ -30,9 +30,9 @@ from telegram.ext import (
     ContextTypes,
 )
 
-from bot.config import Config
+from bot.config import BOT_USERNAME, BOT_NAME, OWNER_ID
 from bot.fonts import sc
-from bot.helpers.buttons import main_menu_keyboard, module_help_keyboard
+from bot.helpers.buttons import main_menu_keyboard, module_help_keyboard, category_keyboard
 
 logger = logging.getLogger(__name__)
 
@@ -156,12 +156,36 @@ _MODULE_HELP: dict[str, str] = {
         f"• <code>/newfed name</code> — {sc('create a new federation')}\n"
         f"• <code>/joinfed fed_id</code> — {sc('join a federation (group admin)')}\n"
         f"• <code>/leavefed</code> — {sc('leave the current federation')}\n"
-        f"• <code>/fban user reason</code> — {sc('federation-ban a user')}\n"
-        f"• <code>/unfban user</code> — {sc('remove a federation ban')}\n"
+        f"• <code>/fedban user reason</code> — {sc('federation-ban a user')}\n"
+        f"• <code>/unfedban user</code> — {sc('remove a federation ban')}\n"
         f"• <code>/fedinfo fed_id</code> — {sc('show federation info')}\n"
         f"• <code>/fedadmins</code> — {sc('list federation admins')}\n"
         f"• <code>/addfedadmin user</code> — {sc('add a federation admin')}\n"
         f"• <code>/rmfedadmin user</code> — {sc('remove a federation admin')}\n"
+    ),
+    "DISABLE": (
+        f"🔕 <b>{sc('disable commands')}</b>\n\n"
+        f"• <code>/disable cmd</code> — {sc('disable a command in this chat')}\n"
+        f"• <code>/enable cmd</code> — {sc('re-enable a disabled command')}\n"
+        f"• <code>/disabled</code> — {sc('list all disabled commands')}\n"
+        f"• <code>/disableable</code> — {sc('list all commands that can be disabled')}\n"
+    ),
+    "STATS": (
+        f"📊 <b>{sc('stats commands')}</b>\n\n"
+        f"• <code>/stats</code> — {sc('show bot statistics (owner/sudo only)')}\n"
+        f"• <code>/broadcast msg</code> — {sc('broadcast to all chats (owner only)')}\n"
+    ),
+    "MAINTENANCE": (
+        f"🔧 <b>{sc('maintenance commands')}</b>\n\n"
+        f"• <code>/maintenance on</code> [reason] — {sc('enable maintenance mode')}\n"
+        f"• <code>/maintenance off</code> — {sc('disable maintenance mode')}\n"
+        f"• <code>/maintenance status</code> — {sc('check current status')}\n\n"
+        f"📌 {sc('owner only. broadcasts to all chats and dms.')}\n"
+    ),
+    "BROADCAST": (
+        f"📡 <b>{sc('broadcast')}</b>\n\n"
+        f"• <code>/broadcast msg</code> — {sc('send a message to all groups')}\n\n"
+        f"📌 {sc('owner only.')}\n"
     ),
 }
 
@@ -182,14 +206,15 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if user is None or chat is None:
         return
 
-    bot_username = Config.BOT_USERNAME
+    bot_username = BOT_USERNAME
 
     if chat.type == "private":
         text = (
             f"👋 {sc('hello')} <b>{user.first_name}</b>!\n\n"
             f"🤖 {sc('i am')} <b>ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b> — {sc('your all-in-one telegram group management assistant.')}\n\n"
             f"🛡 {sc('i can help you manage your groups with advanced moderation tools including bans, mutes, warns, filters, notes, welcome messages, anti-flood, federation bans, and much more.')}\n\n"
-            f"📖 {sc('press')} <b>{sc('help')}</b> {sc('to explore all available commands.')}"
+            f"📖 {sc('press')} <b>{sc('help')}</b> {sc('to explore all available commands.')}\n\n"
+            f"⚡ {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"
         )
 
         keyboard = InlineKeyboardMarkup(
@@ -258,7 +283,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     if chat.type != "private":
-        bot_username = Config.BOT_USERNAME
+        bot_username = BOT_USERNAME
         keyboard = InlineKeyboardMarkup(
             [
                 [
@@ -376,7 +401,7 @@ async def callback_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     # ── Back to /start main screen ──────────────────────────────────────────
     if data == "start:main":
         user = update.effective_user
-        bot_username = Config.BOT_USERNAME
+        bot_username = BOT_USERNAME
         text = (
             f"👋 {sc('hello')} <b>{user.first_name}</b>!\n\n"
             f"🤖 {sc('i am')} <b>ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b> — {sc('your all-in-one telegram group management assistant.')}\n\n"
@@ -409,6 +434,39 @@ async def callback_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     # Unknown callback — silently ignore
     logger.debug("callback_help: unhandled data=%r", data)
+
+
+# ── Category callback handler ────────────────────────────────────────────────
+
+async def callback_category(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle helpcat:* callbacks for category sub-menus."""
+    query = update.callback_query
+    await query.answer()
+    data = query.data or ""
+    cat_key = data.split(":", 1)[1] if ":" in data else ""
+
+    cat_names = {"mod": sc("moderation"), "auto": sc("automation"), "adv": sc("advanced"), "owner": sc("owner tools")}
+    cat_emojis = {"mod": "⚔️", "auto": "🤖", "adv": "🌐", "owner": "👑"}
+
+    name = cat_names.get(cat_key, sc("unknown"))
+    emoji = cat_emojis.get(cat_key, "❓")
+
+    text = (
+        f"<b>{emoji} {name}</b>\n\n"
+        f"{sc('select a module below to view its commands')}:"
+    )
+    kb = category_keyboard(cat_key)
+    await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
+
+
+async def callback_close(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Delete the help message on close button."""
+    query = update.callback_query
+    await query.answer()
+    try:
+        await query.message.delete()
+    except Exception:
+        pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -499,6 +557,22 @@ def register_handlers(app: Application) -> None:
         CallbackQueryHandler(
             callback_help,
             pattern=r"^(help:|start:)",
+        )
+    )
+
+    # Handle helpcat:* callbacks for category navigation
+    app.add_handler(
+        CallbackQueryHandler(
+            callback_category,
+            pattern=r"^helpcat:",
+        )
+    )
+
+    # Handle help:close
+    app.add_handler(
+        CallbackQueryHandler(
+            callback_close,
+            pattern=r"^help:close$",
         )
     )
 
