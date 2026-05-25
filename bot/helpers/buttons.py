@@ -246,7 +246,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
         Btn(f"{data['emoji']} {sc(key.lower())}", callback_data=f"help:{key}")
         for key, data in MODULES.items()
     ]
-    rows = build_menu(btns, n_cols=3, footer=[_close()])
+    rows = build_menu(btns, n_cols=3, footer=[_back("start:main"), _close()])
     return InlineKeyboardMarkup(rows)
 
 
@@ -261,7 +261,7 @@ def module_help_keyboard(module_name: str) -> InlineKeyboardMarkup:
         return InlineKeyboardMarkup([[_back("help:main")]])
 
     btns = [
-        Btn(f"/{cmd}", callback_data=f"cmd:{module_name}:{cmd}")
+        Btn(f"{sc(cmd)}", callback_data=f"cmd:{module_name}:{cmd}")
         for cmd in mod["cmds"]
     ]
     rows = build_menu(btns, n_cols=3, footer=[_back("help:main"), _close()])
@@ -273,9 +273,11 @@ def module_help_keyboard(module_name: str) -> InlineKeyboardMarkup:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def command_detail_keyboard(module_name: str) -> InlineKeyboardMarkup:
-    """Back to module sub-menu + close."""
+    """Back to module sub-menu + back to main + close."""
     return InlineKeyboardMarkup([
-        [_back(f"help:{module_name}"), _close()],
+        [_back(f"help:{module_name}"),
+         Btn(f"🏠 {sc('menu')}", callback_data="help:main"),
+         _close()],
     ])
 
 

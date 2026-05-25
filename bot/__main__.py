@@ -221,9 +221,8 @@ def _print_banner(username: str, bot_id: int) -> None:
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-def main() -> None:
-    logger.info("Building Application...")
-
+def _build_and_run() -> None:
+    """Build the Application and run polling. Returns when polling stops."""
     app = (
         ApplicationBuilder()
         .token(BOT_TOKEN)
@@ -234,6 +233,10 @@ def main() -> None:
         .write_timeout(30)
         .connect_timeout(30)
         .pool_timeout(15)
+        .get_updates_read_timeout(30)
+        .get_updates_write_timeout(30)
+        .get_updates_connect_timeout(30)
+        .get_updates_pool_timeout(15)
         .build()
     )
 
@@ -244,13 +247,44 @@ def main() -> None:
     app.run_polling(
         allowed_updates=Update.ALL_TYPES,
         drop_pending_updates=True,
-        close_loop=True,
+        close_loop=False,
     )
 
 
+def main() -> None:
+    """Immortal bot loop — auto-restarts on any crash.
+    Only Ctrl+C (KeyboardInterrupt) can kill it."""
+    import time as _time
+
+    MAX_BACKOFF = 60  # max wait between restarts (seconds)
+    backoff = 5       # start at 5 seconds
+
+    while True:
+        try:
+            _build_and_run()
+            # if run_polling returns normally, it means graceful shutdown
+            logger.info("Polling stopped gracefully.")
+            break
+        except KeyboardInterrupt:
+            logger.info("Shutdown via Ctrl+C.")
+            break
+        except SystemExit as e:
+            if e.code == 0:
+                break
+            logger.error("SystemExit with code %s — restarting in %ds...", e.code, backoff)
+            _time.sleep(backoff)
+            backoff = min(backoff * 2, MAX_BACKOFF)
+        except Exception as exc:
+            logger.error(
+                "Bot crashed: %s — restarting in %ds...", exc, backoff,
+                exc_info=True,
+            )
+            _time.sleep(backoff)
+            backoff = min(backoff * 2, MAX_BACKOFF)
+        else:
+            break
+
+
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        logger.info("Shutdown via Ctrl+C.")
-        sys.exit(0)
+    main()
+
