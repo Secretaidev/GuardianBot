@@ -1,5 +1,5 @@
 """
-ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — /start, /help, /id, /ping
+ᴏʟɪᴠɪᴀᴍᴀɴᴀɢᴇᴍᴇɴᴛʙᴏᴛ — /start, /help, /id, /ping
 3-level interactive help: Main → Module (sub-buttons) → Command detail
 Crafted by 𝐒𝐄𝐂𝐑𝐄𝐓
 """
@@ -22,7 +22,7 @@ def _uname(context) -> str:
     """Get bot username — always correct from Telegram API."""
     if context and context.bot and context.bot.username:
         return context.bot.username
-    return BOT_USERNAME or "RoseManagementBot"
+    return BOT_USERNAME or "OliviaManagementBot"
 from bot.fonts import sc
 from bot.helpers.buttons import (
     main_menu_keyboard, module_help_keyboard, command_detail_keyboard,
@@ -49,7 +49,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         uname = _uname(context)
         text = (
             f"👋 {sc('hello')} <b>{html.escape(user.first_name)}</b>!\n\n"
-            f"🛡️ {sc('i am')} <b>ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b> — {sc('the most powerful telegram group management bot.')}\n\n"
+            f"🛡️ {sc('i am')} <b>ᴏʟɪᴠɪᴀᴍᴀɴᴀɢᴇᴍᴇɴᴛʙᴏᴛ</b> — {sc('the most powerful telegram group management bot.')}\n\n"
             f"⚡ {sc('features')}: {sc('bans, mutes, warns, filters, notes, welcome, locks, blocklist, anti-flood, federation, rules, reports, and more.')}\n\n"
             f"📖 {sc('tap')} <b>❓ {sc('help')}</b> {sc('to explore all commands.')}\n\n"
             f"🔥 {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"
@@ -61,7 +61,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ],
             [
                 InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{uname}?startgroup=start"),
-                InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/NexonBotz"),
+                InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/OliviaBotz"),
             ],
         ])
         await update.effective_message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
@@ -100,7 +100,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def _send_help_main(update: Update) -> None:
     text = (
-        f"<b>🛡️ ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — {sc('help menu')}</b>\n\n"
+        f"<b>🛡️ ᴏʟɪᴠɪᴀᴍᴀɴᴀɢᴇᴍᴇɴᴛʙᴏᴛ — {sc('help menu')}</b>\n\n"
         f"{sc('tap any module to see its commands')} 👇"
     )
     kb = main_menu_keyboard()
@@ -205,7 +205,7 @@ async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         user = update.effective_user
         text = (
             f"👋 {sc('hello')} <b>{html.escape(user.first_name)}</b>!\n\n"
-            f"🛡️ {sc('i am')} <b>ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b> — {sc('the most powerful telegram group management bot.')}\n\n"
+            f"🛡️ {sc('i am')} <b>ᴏʟɪᴠɪᴀᴍᴀɴᴀɢᴇᴍᴇɴᴛʙᴏᴛ</b> — {sc('the most powerful telegram group management bot.')}\n\n"
             f"📖 {sc('tap')} <b>❓ {sc('help')}</b> {sc('to explore all commands.')}\n\n"
             f"🔥 {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"
         )
@@ -216,7 +216,7 @@ async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             ],
             [
                 InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{_uname(context)}?startgroup=start"),
-                InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/NexonBotz"),
+                InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/OliviaBotz"),
             ],
         ])
         await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
@@ -287,8 +287,8 @@ async def cmd_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"📦 {sc('framework')}: python-telegram-bot\n"
         f"🗄️ {sc('database')}: MongoDB\n"
         f"👑 {sc('owner')}: <b>𝐒𝐄𝐂𝐑𝐄𝐓</b> (@its_me_secret)\n"
-        f"📢 {sc('support')}: @NexonBotz\n"
-        f"🤖 {sc('bot')}: @RoseManagementBot\n"
+        f"📢 {sc('support')}: @OliviaBotz\n"
+        f"🤖 {sc('bot')}: @OliviaManagementBot\n"
     )
     await update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
 
