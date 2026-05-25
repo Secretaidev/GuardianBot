@@ -113,7 +113,7 @@ async def handler_chat_member_update(
     if new_member.status in (
         ChatMemberStatus.MEMBER,
         ChatMemberStatus.ADMINISTRATOR,
-        ChatMemberStatus.OWNER,
+        ChatMemberStatus.CREATOR,
     ):
         user = new_member.user
         if not user.is_bot:
@@ -177,7 +177,7 @@ async def cmd_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     status_label = sc("member")
     if chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
         raw_status = await get_user_status(chat.id, target.id, context.bot)
-        if raw_status == ChatMemberStatus.OWNER:
+        if raw_status == ChatMemberStatus.CREATOR:
             status_label = f"👑 {sc('owner')}"
         elif raw_status == ChatMemberStatus.ADMINISTRATOR:
             status_label = f"🛡 {sc('admin')}"

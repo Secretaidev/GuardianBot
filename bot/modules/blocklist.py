@@ -25,7 +25,7 @@ VALID_MODES = ("delete", "warn", "mute", "kick", "ban")
 async def _is_admin(chat_id: int, user_id: int, bot) -> bool:
     try:
         m = await bot.get_chat_member(chat_id, user_id)
-        return m.status in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER)
+        return m.status in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR)
     except Exception:
         return False
 

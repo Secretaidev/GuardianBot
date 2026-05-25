@@ -158,7 +158,7 @@ permission checks and can run owner-only commands."""
 BOT_NAME: Final[str] = os.getenv("BOT_NAME", "ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ").strip() or "ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ"
 """Human-readable display name shown in help messages and status output."""
 
-BOT_USERNAME: Final[str] = os.getenv("BOT_USERNAME", "").strip().lstrip("@")
+BOT_USERNAME: Final[str] = os.getenv("BOT_USERNAME", "RoseManagementBot").strip().lstrip("@")
 """Bot @username without the leading ``@``.
 Leave blank to let the bot resolve it from the API on first start."""
 

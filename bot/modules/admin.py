@@ -52,7 +52,7 @@ async def promote_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await msg.reply_text(f"❌ {sc('user not found.')}")
         return
 
-    if member.status in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER):
+    if member.status in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR):
         await msg.reply_text(f"ℹ️ {sc('user is already an admin.')}")
         return
 
@@ -182,7 +182,7 @@ async def adminlist_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         ctitle  = ""
         if isinstance(admin, ChatMemberAdministrator) and admin.custom_title:
             ctitle = f" — <i>{html.escape(admin.custom_title)}</i>"
-        if admin.status == ChatMemberStatus.OWNER:
+        if admin.status == ChatMemberStatus.CREATOR:
             owner_lines.append(f"👑 {mention}{ctitle}")
         else:
             admin_lines.append(f"⭐ {mention}{ctitle}")
@@ -219,7 +219,7 @@ async def adminlist_refresh_cb(update: Update, context: ContextTypes.DEFAULT_TYP
         ctitle  = ""
         if isinstance(admin, ChatMemberAdministrator) and admin.custom_title:
             ctitle = f" — <i>{html.escape(admin.custom_title)}</i>"
-        if admin.status == ChatMemberStatus.OWNER:
+        if admin.status == ChatMemberStatus.CREATOR:
             owner_lines.append(f"👑 {mention}{ctitle}")
         else:
             admin_lines.append(f"⭐ {mention}{ctitle}")

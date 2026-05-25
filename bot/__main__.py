@@ -6,9 +6,12 @@ Run:  python -m bot   or   python run.py
 """
 from __future__ import annotations
 
+import asyncio
 import importlib
 import logging
+import signal
 import sys
+import time as _time
 
 from telegram import Update
 from telegram.constants import ParseMode
@@ -52,17 +55,13 @@ MODULES: list[str] = [
 # ── MongoDB ───────────────────────────────────────────────────────────────────
 
 async def _connect_db() -> None:
-    """Connect MongoDB via the proper connect_db() from database.mongo."""
     try:
         from bot.database.mongo import connect_db
         await connect_db()
         logger.info("MongoDB connected via database.mongo.connect_db()")
-    except SystemExit:
-        logger.critical("MongoDB connection failed — cannot start without DB.")
-        raise
     except Exception as exc:
         logger.error("MongoDB init failed: %s", exc, exc_info=True)
-        logger.warning("Bot will start but DB-dependent features may fail.")
+        logger.warning("Bot will start but DB features may fail.")
 
 
 # ── Module loader ─────────────────────────────────────────────────────────────
@@ -77,7 +76,7 @@ def _register_modules(app: Application) -> None:
                 mod.register_handlers(app)
                 loaded.append(name)
             else:
-                logger.warning("Module '%s' has no register_handlers() — skipped.", name)
+                logger.warning("Module '%s' has no register_handlers().", name)
                 failed.append(name)
         except Exception as exc:
             logger.error("Module '%s' failed: %s", name, exc, exc_info=True)
@@ -90,20 +89,20 @@ def _register_modules(app: Application) -> None:
     )
 
 
-# ── Error handler (never lets the bot die) ────────────────────────────────────
+# ── Error handler ─────────────────────────────────────────────────────────────
 
 async def _error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Catch ALL unhandled exceptions. Log them, don't crash."""
     import traceback as tb
 
     err = context.error
     if err is None:
         return
 
-    # Ignore harmless network blips
-    from telegram.error import TimedOut, NetworkError
+    from telegram.error import TimedOut, NetworkError, RetryAfter
     if isinstance(err, (TimedOut, NetworkError)):
-        logger.debug("Network blip (ignored): %s", err)
+        return  # silent — these are normal on long polling
+    if isinstance(err, RetryAfter):
+        logger.warning("Flood wait: %s seconds", err.retry_after)
         return
 
     tb_str = "".join(tb.format_exception(type(err), err, err.__traceback__))
@@ -120,7 +119,6 @@ async def _error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> 
         if info:
             logger.error("Context: %s", " | ".join(info))
 
-    # try to notify owner about the error
     try:
         short = str(err)[:200]
         await context.bot.send_message(
@@ -128,66 +126,6 @@ async def _error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> 
             f"🔴 <b>{sc('error')}</b>\n<code>{short}</code>",
             parse_mode=ParseMode.HTML,
         )
-    except Exception:
-        pass
-
-
-# ── Post-init (runs after bot authenticates) ──────────────────────────────────
-
-async def _post_init(app: Application) -> None:
-    # connect MongoDB FIRST
-    await _connect_db()
-
-    # start telegram log channel consumer
-    try:
-        await TelegramChannelHandler.start(app.bot, rate_limit=18.0)
-    except Exception as e:
-        logger.warning("Log channel handler failed to start: %s", e)
-
-    # server-side log rotation
-    try:
-        from bot.helpers.autodelete import setup_log_rotation, cleanup_old_logs
-        setup_log_rotation()
-        cleanup_old_logs(max_age_days=7)
-    except Exception:
-        pass
-
-    # resolve bot info
-    bot_user = await app.bot.get_me()
-    username = f"@{bot_user.username}" if bot_user.username else BOT_NAME
-    _print_banner(username, bot_user.id)
-
-    # send startup notification to log channel
-    try:
-        from datetime import datetime, timezone
-        now = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-        await app.bot.send_message(
-            chat_id=LOG_CHANNEL_ID,
-            text=(
-                f"🟢 <b>{sc(BOT_NAME)} ᴏɴʟɪɴᴇ</b>\n"
-                f"<b>{sc('username')}:</b> <code>{username}</code>\n"
-                f"<b>{sc('id')}:</b> <code>{bot_user.id}</code>\n"
-                f"<b>{sc('owner')}:</b> <code>{OWNER_ID}</code>\n"
-                f"<b>{sc('modules')}:</b> <code>{len(MODULES)}</code>\n"
-                f"<i>🕐 {now}</i>"
-            ),
-            parse_mode=ParseMode.HTML,
-        )
-    except Exception as exc:
-        logger.warning("Startup notification failed: %s", exc)
-
-    logger.info("%s live as %s (ID: %d)", BOT_NAME, username, bot_user.id)
-
-
-async def _post_stop(app: Application) -> None:
-    logger.info("Polling cycle ended — cleaning up (will auto-restart)...")
-    try:
-        await TelegramChannelHandler.stop()
-    except Exception:
-        pass
-    try:
-        from bot.database.mongo import close_db
-        await close_db()
     except Exception:
         pass
 
@@ -219,84 +157,161 @@ def _print_banner(username: str, bot_id: int) -> None:
     )
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# ── Async run (NO run_polling — manual control) ──────────────────────────────
 
-def _build_and_run() -> None:
-    """Build the Application and run polling. Returns when polling stops."""
-    app = (
-        ApplicationBuilder()
-        .token(BOT_TOKEN)
-        .post_init(_post_init)
-        .post_stop(_post_stop)
-        .connection_pool_size(16)
-        .read_timeout(30)
-        .write_timeout(30)
-        .connect_timeout(30)
-        .pool_timeout(15)
-        .get_updates_read_timeout(30)
-        .get_updates_write_timeout(30)
-        .get_updates_connect_timeout(30)
-        .get_updates_pool_timeout(15)
-        .build()
-    )
-
-    app.add_error_handler(_error_handler)
-    _register_modules(app)
-
-    logger.info("Starting polling — press Ctrl+C to stop.")
-    app.run_polling(
-        allowed_updates=Update.ALL_TYPES,
-        drop_pending_updates=True,
-        close_loop=False,
-    )
-
-
-def main() -> None:
-    """Immortal bot — NEVER dies unless you press Ctrl+C.
-    If run_polling exits for ANY reason (network, signal, error),
-    it waits 5s and restarts automatically."""
-    import time as _time
+async def _run_bot() -> None:
+    """Start the bot with full manual control over the polling loop.
+    This function NEVER returns unless KeyboardInterrupt."""
 
     RESTART_DELAY = 5
     attempt = 0
 
     while True:
         attempt += 1
+        logger.info("=== Starting bot (attempt #%d) ===", attempt)
+        app = None
+
         try:
-            logger.info("=== Starting bot (attempt #%d) ===", attempt)
-            _build_and_run()
-            # run_polling returned — this means something killed it
-            # (SIGTERM from platform, network reset, etc.)
-            # DO NOT break — restart instead
-            logger.warning(
-                "Polling stopped unexpectedly — restarting in %ds...",
-                RESTART_DELAY,
+            # Build fresh Application each attempt
+            app = (
+                ApplicationBuilder()
+                .token(BOT_TOKEN)
+                .connection_pool_size(16)
+                .read_timeout(30)
+                .write_timeout(30)
+                .connect_timeout(30)
+                .pool_timeout(15)
+                .get_updates_read_timeout(30)
+                .get_updates_write_timeout(30)
+                .get_updates_connect_timeout(30)
+                .get_updates_pool_timeout(15)
+                .build()
             )
-            _time.sleep(RESTART_DELAY)
+
+            app.add_error_handler(_error_handler)
+            _register_modules(app)
+
+            # Initialize the application
+            await app.initialize()
+
+            # Connect MongoDB
+            await _connect_db()
+
+            # Start telegram log channel
+            try:
+                await TelegramChannelHandler.start(app.bot, rate_limit=18.0)
+            except Exception as e:
+                logger.warning("Log channel start failed: %s", e)
+
+            # Get bot info and print banner
+            bot_user = await app.bot.get_me()
+            username = f"@{bot_user.username}" if bot_user.username else BOT_NAME
+            if attempt == 1:
+                _print_banner(username, bot_user.id)
+
+            # Send startup notification
+            try:
+                from datetime import datetime, timezone
+                now = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+                await app.bot.send_message(
+                    chat_id=LOG_CHANNEL_ID,
+                    text=(
+                        f"🟢 <b>{sc(BOT_NAME)} ᴏɴʟɪɴᴇ</b>\n"
+                        f"<b>{sc('username')}:</b> <code>{username}</code>\n"
+                        f"<b>{sc('id')}:</b> <code>{bot_user.id}</code>\n"
+                        f"<b>{sc('owner')}:</b> <code>{OWNER_ID}</code>\n"
+                        f"<b>{sc('modules')}:</b> <code>{len(MODULES)}</code>\n"
+                        f"<i>🕐 {now}</i>"
+                    ),
+                    parse_mode=ParseMode.HTML,
+                )
+            except Exception:
+                pass
+
+            logger.info("%s live as %s (ID: %d)", BOT_NAME, username, bot_user.id)
+
+            # Start the application
+            await app.start()
+
+            # Start polling — this is the actual update fetcher
+            await app.updater.start_polling(
+                allowed_updates=Update.ALL_TYPES,
+                drop_pending_updates=True,
+            )
+
+            logger.info("Polling active — bot is running.")
+
+            # Keep alive forever — just idle here
+            # This is the KEY difference from run_polling():
+            # We DON'T let the event loop stop. We wait forever.
+            stop_event = asyncio.Event()
+
+            # On SIGTERM/SIGINT, set the event instead of crashing
+            def _signal_handler():
+                logger.info("Signal received — will restart...")
+                stop_event.set()
+
+            loop = asyncio.get_running_loop()
+            for sig in (signal.SIGINT, signal.SIGTERM):
+                try:
+                    loop.add_signal_handler(sig, _signal_handler)
+                except NotImplementedError:
+                    # Windows doesn't support add_signal_handler
+                    pass
+
+            # Wait forever (or until signal)
+            await stop_event.wait()
+
+            # Clean shutdown of this cycle
+            logger.info("Stopping polling cycle...")
+            await app.updater.stop()
+            await app.stop()
+            await app.shutdown()
+
+            try:
+                await TelegramChannelHandler.stop()
+            except Exception:
+                pass
+
+            logger.info("Cycle ended — restarting in %ds...", RESTART_DELAY)
+            await asyncio.sleep(RESTART_DELAY)
 
         except KeyboardInterrupt:
-            # ONLY way to kill the bot — manual Ctrl+C
             logger.info("Shutdown via Ctrl+C. Goodbye!")
+            if app:
+                try:
+                    await app.updater.stop()
+                    await app.stop()
+                    await app.shutdown()
+                except Exception:
+                    pass
             break
-
-        except SystemExit as e:
-            if e.code == 0:
-                # explicit clean exit (shouldn't happen, but just in case)
-                logger.info("Clean exit requested.")
-                break
-            logger.error(
-                "SystemExit(%s) — restarting in %ds...", e.code, RESTART_DELAY,
-            )
-            _time.sleep(RESTART_DELAY)
 
         except Exception as exc:
             logger.error(
-                "Bot crashed: %s — restarting in %ds...",
+                "Bot error: %s — restarting in %ds...",
                 exc, RESTART_DELAY, exc_info=True,
             )
-            _time.sleep(RESTART_DELAY)
+            if app:
+                try:
+                    await app.updater.stop()
+                    await app.stop()
+                    await app.shutdown()
+                except Exception:
+                    pass
+
+            await asyncio.sleep(RESTART_DELAY)
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def main() -> None:
+    """Entry point — runs the immortal bot loop."""
+    try:
+        asyncio.run(_run_bot())
+    except KeyboardInterrupt:
+        logger.info("Shutdown via Ctrl+C.")
 
 
 if __name__ == "__main__":
     main()
-

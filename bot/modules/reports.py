@@ -31,7 +31,7 @@ async def reports_setting_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Check admin
     try:
         member = await chat.get_member(user.id)
-        if member.status not in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER):
+        if member.status not in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR):
             await message.reply_text(f"❌ {sc('only admins can change report settings.')}")
             return
     except Exception:

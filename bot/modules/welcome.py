@@ -185,14 +185,14 @@ async def handle_chat_member(
 
     # Detect join: was not a member → is now a member
     joined = (
-        old_status in (ChatMemberStatus.LEFT, ChatMemberStatus.BANNED, ChatMemberStatus.KICKED)
+        old_status in (ChatMemberStatus.LEFT, ChatMemberStatus.BANNED)
         and new_status in (ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR)
     )
 
     # Detect leave: was a member → is now left/banned/kicked
     left = (
         old_status in (ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR)
-        and new_status in (ChatMemberStatus.LEFT, ChatMemberStatus.BANNED, ChatMemberStatus.KICKED)
+        and new_status in (ChatMemberStatus.LEFT, ChatMemberStatus.BANNED)
     )
 
     if joined:

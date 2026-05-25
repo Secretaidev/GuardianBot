@@ -16,6 +16,13 @@ from telegram.ext import (
 )
 
 from bot.config import BOT_USERNAME, BOT_NAME, OWNER_ID
+
+
+def _uname(context) -> str:
+    """Get bot username — always correct from Telegram API."""
+    if context and context.bot and context.bot.username:
+        return context.bot.username
+    return BOT_USERNAME or "RoseManagementBot"
 from bot.fonts import sc
 from bot.helpers.buttons import (
     main_menu_keyboard, module_help_keyboard, command_detail_keyboard,
@@ -36,10 +43,10 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     if chat.type == "private":
-        # check deep-link: /start help
         if context.args and context.args[0] == "help":
             return await _send_help_main(update)
 
+        uname = _uname(context)
         text = (
             f"👋 {sc('hello')} <b>{html.escape(user.first_name)}</b>!\n\n"
             f"🛡️ {sc('i am')} <b>ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b> — {sc('the most powerful telegram group management bot.')}\n\n"
@@ -53,16 +60,16 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 InlineKeyboardButton(f"❓ {sc('help')}", callback_data="help:main"),
             ],
             [
-                InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{BOT_USERNAME}?startgroup=start"),
+                InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{uname}?startgroup=start"),
                 InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/NexonBotz"),
             ],
         ])
         await update.effective_message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
 
     else:
-        # group — brief msg with PM button
+        uname = _uname(context)
         kb = InlineKeyboardMarkup([[
-            InlineKeyboardButton(f"📖 {sc('help')}", url=f"https://t.me/{BOT_USERNAME}?start=help"),
+            InlineKeyboardButton(f"📖 {sc('help')}", url=f"https://t.me/{uname}?start=help"),
         ]])
         await update.effective_message.reply_text(
             f"👋 {sc('hey')} <b>{html.escape(user.first_name)}</b>! {sc('pm me for help.')}",
@@ -79,8 +86,9 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not chat:
         return
     if chat.type != "private":
+        uname = _uname(context)
         kb = InlineKeyboardMarkup([[
-            InlineKeyboardButton(f"📖 {sc('open help in pm')}", url=f"https://t.me/{BOT_USERNAME}?start=help"),
+            InlineKeyboardButton(f"📖 {sc('open help in pm')}", url=f"https://t.me/{uname}?start=help"),
         ]])
         await update.effective_message.reply_text(
             f"📖 {sc('click below to view all commands in pm.')}",
@@ -155,12 +163,26 @@ async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             uc = cc = 0
 
         try:
-            from bot.helpers.autodelete import get_server_stats
-            s = get_server_stats()
+            import os, sys
+            from datetime import datetime, timezone
+            _start = getattr(sys.modules[__name__], '_BOT_START', None)
+            if not _start:
+                _start = datetime.now(timezone.utc)
+                sys.modules[__name__]._BOT_START = _start
+            delta = datetime.now(timezone.utc) - _start
+            hours, rem = divmod(int(delta.total_seconds()), 3600)
+            mins, secs = divmod(rem, 60)
+            uptime_str = f"{hours}h {mins}m {secs}s"
+            try:
+                import psutil
+                proc = psutil.Process(os.getpid())
+                mem_mb = f"{proc.memory_info().rss / 1024 / 1024:.1f}"
+            except Exception:
+                mem_mb = "?"
             extra = (
-                f"⏱️ {sc('uptime')}: <code>{s.get('uptime', '?')}</code>\n"
-                f"💾 {sc('memory')}: <code>{s.get('mem_rss_mb', '?')} MB</code>\n"
-                f"🐍 {sc('python')}: <code>{s.get('python', '?')}</code>\n"
+                f"⏱️ {sc('uptime')}: <code>{uptime_str}</code>\n"
+                f"💾 {sc('memory')}: <code>{mem_mb} MB</code>\n"
+                f"🐍 {sc('python')}: <code>{sys.version.split()[0]}</code>\n"
             )
         except Exception:
             extra = ""
@@ -193,7 +215,7 @@ async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 InlineKeyboardButton(f"❓ {sc('help')}", callback_data="help:main"),
             ],
             [
-                InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{BOT_USERNAME}?startgroup=start"),
+                InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{_uname(context)}?startgroup=start"),
                 InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/NexonBotz"),
             ],
         ])

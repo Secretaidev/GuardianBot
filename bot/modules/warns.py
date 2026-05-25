@@ -88,7 +88,7 @@ async def _is_protected(
         member = await context.bot.get_chat_member(chat.id, user.id)
         return member.status in (
             ChatMemberStatus.ADMINISTRATOR,
-            ChatMemberStatus.OWNER,
+            ChatMemberStatus.CREATOR,
         )
     except TelegramError:
         return False
@@ -492,7 +492,7 @@ async def warnreset_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Verify admin
     try:
         member = await context.bot.get_chat_member(chat.id, actor.id)
-        if member.status not in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER):
+        if member.status not in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR):
             await query.answer(sc("only admins can reset warns."), show_alert=True)
             return
     except TelegramError:
