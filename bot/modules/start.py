@@ -1,579 +1,290 @@
 """
-bot/modules/start.py
-ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — /start, /help, /id, /ping module.
-
-Responsibilities
-----------------
-• /start  — welcome message in PM with action keyboard
-• /help   — paginated module list with inline buttons
-• Callback handler for module-specific help pages
-• /id     — show chat ID and user ID
-• /ping   — show bot latency in milliseconds
+ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — /start, /help, /id, /ping
+3-level interactive help: Main → Module (sub-buttons) → Command detail
+Crafted by 𝐒𝐄𝐂𝐑𝐄𝐓
 """
-
 from __future__ import annotations
 
+import html
 import logging
 import time
 
-from telegram import (
-    CallbackQuery,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    Update,
-)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import (
-    Application,
-    CallbackQueryHandler,
-    CommandHandler,
-    ContextTypes,
+    Application, CallbackQueryHandler, CommandHandler, ContextTypes,
 )
 
 from bot.config import BOT_USERNAME, BOT_NAME, OWNER_ID
 from bot.fonts import sc
-from bot.helpers.buttons import main_menu_keyboard, module_help_keyboard, category_keyboard
+from bot.helpers.buttons import (
+    main_menu_keyboard, module_help_keyboard, command_detail_keyboard,
+    get_command_detail, get_module_header, MODULES,
+)
 
 logger = logging.getLogger(__name__)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Module help texts (small caps, sent in response to callback queries)
-# ─────────────────────────────────────────────────────────────────────────────
 
-_MODULE_HELP: dict[str, str] = {
-    "ADMIN": (
-        f"🛡 <b>{sc('admin commands')}</b>\n\n"
-        f"• <code>/promote</code> — {sc('promote a user to admin')}\n"
-        f"• <code>/demote</code> — {sc('demote an admin to member')}\n"
-        f"• <code>/title</code> — {sc('set a custom admin title')}\n"
-        f"• <code>/settitle</code> — {sc('alias for /title')}\n"
-        f"• <code>/adminlist</code> — {sc('list all current admins')}\n"
-        f"• <code>/pin</code> — {sc('pin a message (reply to it)')}\n"
-        f"• <code>/unpin</code> — {sc('unpin the pinned message')}\n"
-        f"• <code>/unpinall</code> — {sc('unpin all pinned messages')}\n"
-    ),
-    "BANS": (
-        f"🚫 <b>{sc('ban commands')}</b>\n\n"
-        f"• <code>/ban</code> — {sc('ban a user from the group')}\n"
-        f"• <code>/unban</code> — {sc('unban a previously banned user')}\n"
-        f"• <code>/kick</code> — {sc('kick a user (they can rejoin)')}\n"
-        f"• <code>/kickme</code> — {sc('kick yourself from the group')}\n"
-        f"• <code>/tempban</code> — {sc('temporarily ban a user (e.g. 2h, 1d)')}\n"
-        f"• <code>/sban</code> — {sc('silent ban — deletes the command too')}\n"
-    ),
-    "MUTES": (
-        f"🔇 <b>{sc('mute commands')}</b>\n\n"
-        f"• <code>/mute</code> — {sc('mute a user (remove send-message right)')}\n"
-        f"• <code>/unmute</code> — {sc('restore a muted user')}\n"
-        f"• <code>/tmute</code> — {sc('temporarily mute a user (e.g. 30m, 6h)')}\n"
-        f"• <code>/smute</code> — {sc('silent mute — deletes the command too')}\n"
-    ),
-    "WARNS": (
-        f"⚠️ <b>{sc('warn commands')}</b>\n\n"
-        f"• <code>/warn</code> — {sc('issue a warning to a user')}\n"
-        f"• <code>/dwarn</code> — {sc('warn and delete the replied message')}\n"
-        f"• <code>/unwarn</code> — {sc('remove the last warning from a user')}\n"
-        f"• <code>/resetwarns</code> — {sc('clear all warnings for a user')}\n"
-        f"• <code>/warns</code> — {sc('view warnings for a user')}\n"
-        f"• <code>/warnlimit</code> — {sc('set warn limit (default 3)')}\n"
-        f"• <code>/warnmode</code> — {sc('set action on limit: ban/kick/mute')}\n"
-    ),
-    "WELCOME": (
-        f"👋 <b>{sc('welcome commands')}</b>\n\n"
-        f"• <code>/setwelcome</code> — {sc('set a custom welcome message')}\n"
-        f"• <code>/resetwelcome</code> — {sc('restore the default welcome')}\n"
-        f"• <code>/welcome on|off</code> — {sc('toggle the welcome message')}\n"
-        f"• <code>/setgoodbye</code> — {sc('set a goodbye message')}\n"
-        f"• <code>/goodbye on|off</code> — {sc('toggle goodbye messages')}\n"
-        f"• <code>/cleanwelcome on|off</code> — {sc('auto-delete old welcome messages')}\n\n"
-        f"{sc('welcome messages support')}: {{first}}, {{last}}, {{fullname}}, {{username}}, {{mention}}, {{id}}, {{chatname}}\n"
-        f"{sc('and button syntax')}: [ʟᴀʙᴇʟ](url)\n"
-    ),
-    "FILTERS": (
-        f"🔍 <b>{sc('filter commands')}</b>\n\n"
-        f"• <code>/filter keyword reply</code> — {sc('add a text filter')}\n"
-        f"• <code>/stop keyword</code> — {sc('remove a filter')}\n"
-        f"• <code>/filters</code> — {sc('list all active filters')}\n\n"
-        f"{sc('filters support button syntax')}: [ʟᴀʙᴇʟ](url)\n"
-    ),
-    "NOTES": (
-        f"📝 <b>{sc('notes commands')}</b>\n\n"
-        f"• <code>/save name content</code> — {sc('save a note')}\n"
-        f"• <code>#notename</code> — {sc('retrieve a saved note')}\n"
-        f"• <code>/get name</code> — {sc('retrieve a saved note')}\n"
-        f"• <code>/clear name</code> — {sc('delete a note')}\n"
-        f"• <code>/notes</code> — {sc('list all notes in this chat')}\n"
-        f"• <code>/clearall</code> — {sc('delete ALL notes (admin only)')}\n"
-    ),
-    "LOCKS": (
-        f"🔒 <b>{sc('lock commands')}</b>\n\n"
-        f"• <code>/lock type</code> — {sc('lock a message type')}\n"
-        f"• <code>/unlock type</code> — {sc('unlock a message type')}\n"
-        f"• <code>/locks</code> — {sc('show current lock status')}\n\n"
-        f"{sc('lockable types')}: text, media, sticker, gif, url, bot, forward, game, poll, photo, video, voice, audio, document, contact, location\n"
-    ),
-    "BLOCKLIST": (
-        f"🚷 <b>{sc('blocklist commands')}</b>\n\n"
-        f"• <code>/addblocklist word</code> — {sc('add a word to the blocklist')}\n"
-        f"• <code>/rmblocklist word</code> — {sc('remove a word')}\n"
-        f"• <code>/blocklist</code> — {sc('view all blocked words')}\n"
-        f"• <code>/setblocklistmode action</code> — {sc('action: delete/warn/ban/kick/mute')}\n"
-    ),
-    "ANTIFLOOD": (
-        f"🌊 <b>{sc('antiflood commands')}</b>\n\n"
-        f"• <code>/setflood n</code> — {sc('set flood limit (0 = disabled)')}\n"
-        f"• <code>/setfloodmode action</code> — {sc('action: ban/kick/mute/tban/tmute')}\n"
-        f"• <code>/flood</code> — {sc('show current antiflood settings')}\n"
-    ),
-    "REPORTS": (
-        f"📣 <b>{sc('report commands')}</b>\n\n"
-        f"• <code>@admin</code> — {sc('report a message to admins (reply to it)')}\n"
-        f"• <code>/reports on|off</code> — {sc('toggle report notifications for yourself (admins)')}\n"
-    ),
-    "PINS": (
-        f"📌 <b>{sc('pin commands')}</b>\n\n"
-        f"• <code>/pin</code> — {sc('pin the replied message')}\n"
-        f"• <code>/pin loud</code> — {sc('pin and notify all members')}\n"
-        f"• <code>/unpin</code> — {sc('unpin the current pinned message')}\n"
-        f"• <code>/unpinall</code> — {sc('remove ALL pinned messages')}\n"
-        f"• <code>/pinned</code> — {sc('show the current pinned message')}\n"
-    ),
-    "PURGE": (
-        f"🗑 <b>{sc('purge commands')}</b>\n\n"
-        f"• <code>/purge</code> — {sc('delete messages from reply up to this message')}\n"
-        f"• <code>/purge n</code> — {sc('delete the last n messages')}\n"
-        f"• <code>/del</code> — {sc('delete the replied message')}\n"
-    ),
-    "RULES": (
-        f"📋 <b>{sc('rules commands')}</b>\n\n"
-        f"• <code>/setrules text</code> — {sc('set group rules')}\n"
-        f"• <code>/rules</code> — {sc('show group rules')}\n"
-        f"• <code>/clearrules</code> — {sc('delete the group rules')}\n"
-        f"• <code>/privaterules on|off</code> — {sc('send rules via PM instead of in group')}\n"
-    ),
-    "FEDERATION": (
-        f"🌐 <b>{sc('federation commands')}</b>\n\n"
-        f"• <code>/newfed name</code> — {sc('create a new federation')}\n"
-        f"• <code>/joinfed fed_id</code> — {sc('join a federation (group admin)')}\n"
-        f"• <code>/leavefed</code> — {sc('leave the current federation')}\n"
-        f"• <code>/fedban user reason</code> — {sc('federation-ban a user')}\n"
-        f"• <code>/unfedban user</code> — {sc('remove a federation ban')}\n"
-        f"• <code>/fedinfo fed_id</code> — {sc('show federation info')}\n"
-        f"• <code>/fedadmins</code> — {sc('list federation admins')}\n"
-        f"• <code>/addfedadmin user</code> — {sc('add a federation admin')}\n"
-        f"• <code>/rmfedadmin user</code> — {sc('remove a federation admin')}\n"
-    ),
-    "DISABLE": (
-        f"🔕 <b>{sc('disable commands')}</b>\n\n"
-        f"• <code>/disable cmd</code> — {sc('disable a command in this chat')}\n"
-        f"• <code>/enable cmd</code> — {sc('re-enable a disabled command')}\n"
-        f"• <code>/disabled</code> — {sc('list all disabled commands')}\n"
-        f"• <code>/disableable</code> — {sc('list all commands that can be disabled')}\n"
-    ),
-    "STATS": (
-        f"📊 <b>{sc('stats commands')}</b>\n\n"
-        f"• <code>/stats</code> — {sc('show bot statistics (owner/sudo only)')}\n"
-        f"• <code>/broadcast msg</code> — {sc('broadcast to all chats (owner only)')}\n"
-    ),
-    "MAINTENANCE": (
-        f"🔧 <b>{sc('maintenance commands')}</b>\n\n"
-        f"• <code>/maintenance on</code> [reason] — {sc('enable maintenance mode')}\n"
-        f"• <code>/maintenance off</code> — {sc('disable maintenance mode')}\n"
-        f"• <code>/maintenance status</code> — {sc('check current status')}\n\n"
-        f"📌 {sc('owner only. broadcasts to all chats and dms.')}\n"
-    ),
-    "BROADCAST": (
-        f"📡 <b>{sc('broadcast')}</b>\n\n"
-        f"• <code>/broadcast msg</code> — {sc('send a message to all groups')}\n\n"
-        f"📌 {sc('owner only.')}\n"
-    ),
-}
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# /start handler
-# ─────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# /start
+# ═══════════════════════════════════════════════════════════════════════════════
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Send the GuardianBot welcome message.
-
-    In a private chat a full welcome card with an action keyboard is sent.
-    In a group chat a brief acknowledgement with a "ᴘᴍ ᴍᴇ" button is sent.
-    """
     user = update.effective_user
     chat = update.effective_chat
-    if user is None or chat is None:
+    if not user or not chat:
         return
-
-    bot_username = BOT_USERNAME
 
     if chat.type == "private":
+        # check deep-link: /start help
+        if context.args and context.args[0] == "help":
+            return await _send_help_main(update)
+
         text = (
-            f"👋 {sc('hello')} <b>{user.first_name}</b>!\n\n"
-            f"🤖 {sc('i am')} <b>ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b> — {sc('your all-in-one telegram group management assistant.')}\n\n"
-            f"🛡 {sc('i can help you manage your groups with advanced moderation tools including bans, mutes, warns, filters, notes, welcome messages, anti-flood, federation bans, and much more.')}\n\n"
-            f"📖 {sc('press')} <b>{sc('help')}</b> {sc('to explore all available commands.')}\n\n"
-            f"⚡ {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"
+            f"👋 {sc('hello')} <b>{html.escape(user.first_name)}</b>!\n\n"
+            f"🛡️ {sc('i am')} <b>ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b> — {sc('the most powerful telegram group management bot.')}\n\n"
+            f"⚡ {sc('features')}: {sc('bans, mutes, warns, filters, notes, welcome, locks, blocklist, anti-flood, federation, rules, reports, and more.')}\n\n"
+            f"📖 {sc('tap')} <b>❓ {sc('help')}</b> {sc('to explore all commands.')}\n\n"
+            f"🔥 {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"
         )
-
-        keyboard = InlineKeyboardMarkup(
+        kb = InlineKeyboardMarkup([
             [
-                [
-                    InlineKeyboardButton(
-                        text=f"📊 {sc('stats')}",
-                        callback_data="start:stats",
-                    ),
-                    InlineKeyboardButton(
-                        text=f"❓ {sc('help')}",
-                        callback_data="help:main",
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=f"➕ {sc('add to group')}",
-                        url=f"https://t.me/{bot_username}?startgroup=start",
-                    ),
-                    InlineKeyboardButton(
-                        text=f"📢 {sc('support')}",
-                        url="https://t.me/RoseManagementBot",
-                    ),
-                ],
-            ]
-        )
-
-        await update.effective_message.reply_text(
-            text,
-            parse_mode=ParseMode.HTML,
-            reply_markup=keyboard,
-        )
+                InlineKeyboardButton(f"📊 {sc('stats')}", callback_data="start:stats"),
+                InlineKeyboardButton(f"❓ {sc('help')}", callback_data="help:main"),
+            ],
+            [
+                InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{BOT_USERNAME}?startgroup=start"),
+                InlineKeyboardButton(f"👑 {sc('owner')}", url="https://t.me/RoseManagementBot"),
+            ],
+        ])
+        await update.effective_message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
 
     else:
-        # Group chat — keep it brief, avoid spam
-        keyboard = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        text=f"📖 {sc('help')}",
-                        url=f"https://t.me/{bot_username}?start=help",
-                    )
-                ]
-            ]
-        )
+        # group — brief msg with PM button
+        kb = InlineKeyboardMarkup([[
+            InlineKeyboardButton(f"📖 {sc('help')}", url=f"https://t.me/{BOT_USERNAME}?start=help"),
+        ]])
         await update.effective_message.reply_text(
-            f"👋 {sc('hey')} <b>{user.first_name}</b>! {sc('pm me for help with all my commands.')}",
-            parse_mode=ParseMode.HTML,
-            reply_markup=keyboard,
+            f"👋 {sc('hey')} <b>{html.escape(user.first_name)}</b>! {sc('pm me for help.')}",
+            parse_mode=ParseMode.HTML, reply_markup=kb,
         )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# /help handler
-# ─────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# /help
+# ═══════════════════════════════════════════════════════════════════════════════
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Show the paginated module list.
-
-    In a group chat a button is sent directing the user to PM.
-    In a private chat the full help menu is shown.
-    """
     chat = update.effective_chat
-    if chat is None:
+    if not chat:
         return
-
     if chat.type != "private":
-        bot_username = BOT_USERNAME
-        keyboard = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        text=f"📖 {sc('open help in pm')}",
-                        url=f"https://t.me/{bot_username}?start=help",
-                    )
-                ]
-            ]
-        )
+        kb = InlineKeyboardMarkup([[
+            InlineKeyboardButton(f"📖 {sc('open help in pm')}", url=f"https://t.me/{BOT_USERNAME}?start=help"),
+        ]])
         await update.effective_message.reply_text(
-            f"📖 {sc('click below to view all my commands in pm.')}",
-            reply_markup=keyboard,
+            f"📖 {sc('click below to view all commands in pm.')}",
+            reply_markup=kb,
         )
         return
-
     await _send_help_main(update)
 
 
 async def _send_help_main(update: Update) -> None:
-    """Send (or edit) the main help menu."""
     text = (
-        f"<b>🤖 ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — {sc('help menu')}</b>\n\n"
-        f"{sc('select a module below to view its commands')}:"
+        f"<b>🛡️ ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — {sc('help menu')}</b>\n\n"
+        f"{sc('tap any module to see its commands')} 👇"
     )
-    keyboard = main_menu_keyboard()
-
+    kb = main_menu_keyboard()
     msg = update.effective_message
-    if msg is None:
-        return
-
     if update.callback_query:
-        await update.callback_query.edit_message_text(
-            text,
-            parse_mode=ParseMode.HTML,
-            reply_markup=keyboard,
-        )
+        await update.callback_query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
     else:
-        await msg.reply_text(
-            text,
-            parse_mode=ParseMode.HTML,
-            reply_markup=keyboard,
-        )
+        await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Callback query handler — help pages
-# ─────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# CALLBACK ROUTER — handles all 3 levels
+# ═══════════════════════════════════════════════════════════════════════════════
 
-async def callback_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Handle ``help:*`` and ``start:*`` callback queries.
+async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Single router for all help/start/cmd callbacks."""
+    query = update.callback_query
+    await query.answer()
+    data = query.data or ""
 
-    Routing:
-      help:main         → show the module list (main help menu)
-      help:MODULE_NAME  → show per-module help text
-      start:stats       → show brief bot stats
-    """
-    query: CallbackQuery = update.callback_query
-    await query.answer()  # Stop the loading spinner on the client
-
-    data: str = query.data or ""
-
-    # ── Main help menu ──────────────────────────────────────────────────────
+    # ── LEVEL 1: help:main → show all modules ────────────────────────────────
     if data == "help:main":
         await _send_help_main(update)
         return
 
-    # ── Per-module help ─────────────────────────────────────────────────────
-    if data.startswith("help:"):
-        module_name = data[len("help:"):]
-        help_text = _MODULE_HELP.get(module_name)
-
-        if help_text is None:
-            await query.edit_message_text(
-                f"❌ {sc('no help found for module')} <code>{module_name}</code>.",
-                parse_mode=ParseMode.HTML,
-            )
+    # ── LEVEL 2: help:MODULE → show module commands as sub-buttons ────────────
+    if data.startswith("help:") and not data.startswith("help:close"):
+        mod_key = data[5:]  # e.g. "BANS"
+        if mod_key in MODULES:
+            header = get_module_header(mod_key)
+            kb = module_help_keyboard(mod_key)
+            await query.edit_message_text(header, parse_mode=ParseMode.HTML, reply_markup=kb)
             return
 
-        keyboard = module_help_keyboard(module_name)
-        await query.edit_message_text(
-            help_text,
-            parse_mode=ParseMode.HTML,
-            reply_markup=keyboard,
-        )
-        return
+    # ── LEVEL 3: cmd:MODULE:command → show command detail ────────────────────
+    if data.startswith("cmd:"):
+        parts = data.split(":", 2)  # cmd:BANS:ban
+        if len(parts) == 3:
+            mod_key, cmd = parts[1], parts[2]
+            detail = get_command_detail(mod_key, cmd)
+            if detail:
+                mod = MODULES.get(mod_key, {})
+                emoji = mod.get("emoji", "📌")
+                text = (
+                    f"{emoji} <b>/{cmd}</b>\n\n"
+                    f"{detail}"
+                )
+                kb = command_detail_keyboard(mod_key)
+                await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
+                return
 
-    # ── Stats shortcut from /start keyboard ────────────────────────────────
+    # ── start:stats → quick stats card ───────────────────────────────────────
     if data == "start:stats":
         from bot.database.users_db import get_user_count
         from bot.database.chats_db import get_chat_count
+        try:
+            uc = await get_user_count()
+            cc = await get_chat_count()
+        except Exception:
+            uc = cc = 0
 
         try:
-            user_count = await get_user_count()
-            chat_count = await get_chat_count()
+            from bot.helpers.autodelete import get_server_stats
+            s = get_server_stats()
+            extra = (
+                f"⏱️ {sc('uptime')}: <code>{s.get('uptime', '?')}</code>\n"
+                f"💾 {sc('memory')}: <code>{s.get('mem_rss_mb', '?')} MB</code>\n"
+                f"🐍 {sc('python')}: <code>{s.get('python', '?')}</code>\n"
+            )
         except Exception:
-            user_count = chat_count = 0
+            extra = ""
 
         text = (
-            f"<b>📊 {sc('guardian bot stats')}</b>\n\n"
-            f"👤 {sc('users')}: <code>{user_count}</code>\n"
-            f"💬 {sc('groups')}: <code>{chat_count}</code>\n"
+            f"<b>📊 {sc('bot stats')}</b>\n\n"
+            f"👤 {sc('users')}: <code>{uc}</code>\n"
+            f"💬 {sc('groups')}: <code>{cc}</code>\n"
+            f"{extra}\n"
+            f"🔥 {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"
         )
-        back_keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text=f"🔙 {sc('back')}", callback_data="start:main")]]
-        )
-        await query.edit_message_text(
-            text,
-            parse_mode=ParseMode.HTML,
-            reply_markup=back_keyboard,
-        )
+        kb = InlineKeyboardMarkup([[
+            InlineKeyboardButton(f"🔙 {sc('back')}", callback_data="start:main"),
+        ]])
+        await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
         return
 
-    # ── Back to /start main screen ──────────────────────────────────────────
+    # ── start:main → back to /start screen ───────────────────────────────────
     if data == "start:main":
         user = update.effective_user
-        bot_username = BOT_USERNAME
         text = (
-            f"👋 {sc('hello')} <b>{user.first_name}</b>!\n\n"
-            f"🤖 {sc('i am')} <b>ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b> — {sc('your all-in-one telegram group management assistant.')}\n\n"
-            f"📖 {sc('press')} <b>{sc('help')}</b> {sc('to explore all available commands.')}"
+            f"👋 {sc('hello')} <b>{html.escape(user.first_name)}</b>!\n\n"
+            f"🛡️ {sc('i am')} <b>ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b> — {sc('the most powerful telegram group management bot.')}\n\n"
+            f"📖 {sc('tap')} <b>❓ {sc('help')}</b> {sc('to explore all commands.')}\n\n"
+            f"🔥 {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"
         )
-        keyboard = InlineKeyboardMarkup(
+        kb = InlineKeyboardMarkup([
             [
-                [
-                    InlineKeyboardButton(text=f"📊 {sc('stats')}", callback_data="start:stats"),
-                    InlineKeyboardButton(text=f"❓ {sc('help')}", callback_data="help:main"),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=f"➕ {sc('add to group')}",
-                        url=f"https://t.me/{bot_username}?startgroup=start",
-                    ),
-                    InlineKeyboardButton(
-                        text=f"📢 {sc('support')}",
-                        url="https://t.me/RoseManagementBot",
-                    ),
-                ],
-            ]
-        )
-        await query.edit_message_text(
-            text,
-            parse_mode=ParseMode.HTML,
-            reply_markup=keyboard,
-        )
+                InlineKeyboardButton(f"📊 {sc('stats')}", callback_data="start:stats"),
+                InlineKeyboardButton(f"❓ {sc('help')}", callback_data="help:main"),
+            ],
+            [
+                InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{BOT_USERNAME}?startgroup=start"),
+                InlineKeyboardButton(f"👑 {sc('owner')}", url="https://t.me/RoseManagementBot"),
+            ],
+        ])
+        await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
         return
 
-    # Unknown callback — silently ignore
-    logger.debug("callback_help: unhandled data=%r", data)
+    # ── help:close → delete the help message ─────────────────────────────────
+    if data == "help:close":
+        try:
+            await query.message.delete()
+        except Exception:
+            pass
+        return
+
+    # ── no-op for page indicator buttons ─────────────────────────────────────
+    if data == ".":
+        return
 
 
-# ── Category callback handler ────────────────────────────────────────────────
-
-async def callback_category(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle helpcat:* callbacks for category sub-menus."""
-    query = update.callback_query
-    await query.answer()
-    data = query.data or ""
-    cat_key = data.split(":", 1)[1] if ":" in data else ""
-
-    cat_names = {"mod": sc("moderation"), "auto": sc("automation"), "adv": sc("advanced"), "owner": sc("owner tools")}
-    cat_emojis = {"mod": "⚔️", "auto": "🤖", "adv": "🌐", "owner": "👑"}
-
-    name = cat_names.get(cat_key, sc("unknown"))
-    emoji = cat_emojis.get(cat_key, "❓")
-
-    text = (
-        f"<b>{emoji} {name}</b>\n\n"
-        f"{sc('select a module below to view its commands')}:"
-    )
-    kb = category_keyboard(cat_key)
-    await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
-
-
-async def callback_close(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Delete the help message on close button."""
-    query = update.callback_query
-    await query.answer()
-    try:
-        await query.message.delete()
-    except Exception:
-        pass
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# /id handler
-# ─────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# /id
+# ═══════════════════════════════════════════════════════════════════════════════
 
 async def cmd_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Show user and chat IDs.
-
-    • In private: shows the sender's user ID.
-    • In a group: shows the group chat ID, the sender's user ID, and if the
-      command is a reply, the replied-to user's ID.
-    """
     msg = update.effective_message
     user = update.effective_user
     chat = update.effective_chat
-    if msg is None or user is None or chat is None:
+    if not msg or not user or not chat:
         return
 
-    lines: list[str] = []
-
+    lines = []
     if chat.type == "private":
-        lines.append(f"👤 {sc('your user id')}: <code>{user.id}</code>")
+        lines.append(f"👤 {sc('your id')}: <code>{user.id}</code>")
     else:
         lines.append(f"💬 {sc('chat id')}: <code>{chat.id}</code>")
-        lines.append(f"👤 {sc('your user id')}: <code>{user.id}</code>")
-
+        lines.append(f"👤 {sc('your id')}: <code>{user.id}</code>")
         if msg.reply_to_message and msg.reply_to_message.from_user:
-            target = msg.reply_to_message.from_user
-            name = target.full_name
-            lines.append(
-                f"🔎 {sc('replied user')}: <b>{name}</b> — <code>{target.id}</code>"
-            )
+            t = msg.reply_to_message.from_user
+            lines.append(f"🔎 {sc('replied user')}: <b>{html.escape(t.full_name)}</b> — <code>{t.id}</code>")
 
-    await msg.reply_text(
-        "\n".join(lines),
-        parse_mode=ParseMode.HTML,
-    )
+    await msg.reply_text("\n".join(lines), parse_mode=ParseMode.HTML)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# /ping handler
-# ─────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# /ping
+# ═══════════════════════════════════════════════════════════════════════════════
 
 async def cmd_ping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Measure and display the round-trip latency between the bot and Telegram.
-
-    Sends a placeholder message, measures how long the API call took, then
-    edits the message with the measured ping time.
-    """
     msg = update.effective_message
-    if msg is None:
+    if not msg:
         return
-
-    start = time.perf_counter()
+    t0 = time.perf_counter()
     sent = await msg.reply_text(f"🏓 {sc('pinging')}...")
-    elapsed_ms = (time.perf_counter() - start) * 1000
-
+    ms = (time.perf_counter() - t0) * 1000
     await sent.edit_text(
-        f"🏓 {sc('pong')}!\n"
-        f"⚡ {sc('latency')}: <code>{elapsed_ms:.2f} ms</code>",
+        f"🏓 {sc('pong')}!\n⚡ {sc('latency')}: <code>{ms:.1f} ms</code>",
         parse_mode=ParseMode.HTML,
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# /about
+# ═══════════════════════════════════════════════════════════════════════════════
+
+async def cmd_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    text = (
+        f"<b>🛡️ ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b>\n\n"
+        f"👑 {sc('owner')}: <b>𝐒𝐄𝐂𝐑𝐄𝐓</b> (@its_me_secret)\n"
+        f"🐍 {sc('language')}: Python 3.11+\n"
+        f"📦 {sc('framework')}: python-telegram-bot\n"
+        f"🗄️ {sc('database')}: MongoDB\n"
+        f"🔗 {sc('source')}: <a href='https://github.com/Secretaidev/GuardianBot'>GitHub</a>\n"
+    )
+    await update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Handler registration
-# ─────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
 
 def register_handlers(app: Application) -> None:
-    """
-    Register all handlers defined in this module with the PTB Application.
-
-    Call this once during bot initialisation.
-
-    Args:
-        app: The :class:`telegram.ext.Application` instance.
-    """
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("help", cmd_help))
     app.add_handler(CommandHandler("id", cmd_id))
     app.add_handler(CommandHandler("ping", cmd_ping))
+    app.add_handler(CommandHandler("about", cmd_about))
 
-    # Handle all help:* and start:* callback queries
-    app.add_handler(
-        CallbackQueryHandler(
-            callback_help,
-            pattern=r"^(help:|start:)",
-        )
-    )
-
-    # Handle helpcat:* callbacks for category navigation
-    app.add_handler(
-        CallbackQueryHandler(
-            callback_category,
-            pattern=r"^helpcat:",
-        )
-    )
-
-    # Handle help:close
-    app.add_handler(
-        CallbackQueryHandler(
-            callback_close,
-            pattern=r"^help:close$",
-        )
-    )
+    # single router for ALL callback patterns
+    app.add_handler(CallbackQueryHandler(
+        callback_router,
+        pattern=r"^(help:|start:|cmd:|\.)",
+    ))
 
     logger.info("start.py handlers registered.")
