@@ -1,11 +1,10 @@
 FROM python:3.11-slim
 
-LABEL maintainer="GuardianBot" \
-      description="World-class Telegram Group Management Bot"
+LABEL maintainer="𝐒𝐄𝐂𝐑𝐄𝐓" \
+      description="ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — Telegram Group Management Bot"
 
 WORKDIR /app
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
@@ -15,8 +14,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Create non-root user for security
 RUN useradd -m -u 1000 botuser && chown -R botuser:botuser /app
 USER botuser
+
+ENV PORT=8080
+EXPOSE 8080
 
 CMD ["python", "-m", "bot"]

@@ -157,6 +157,53 @@ def _print_banner(username: str, bot_id: int) -> None:
     )
 
 
+# ── Health check server (Railway/Render need this) ────────────────────────────
+
+async def _start_health_server() -> None:
+    """Tiny HTTP server that responds 200 OK on /health.
+    Railway/Render hit this to know the bot is alive."""
+    import os
+
+    port = int(os.environ.get("PORT", 8080))
+
+    async def _handle(reader, writer):
+        try:
+            data = await asyncio.wait_for(reader.read(1024), timeout=5)
+        except Exception:
+            data = b""
+        request_line = data.decode(errors="ignore").split("\n")[0] if data else ""
+
+        if "/health" in request_line or "/ " in request_line or request_line == "":
+            body = '{"status":"ok"}'
+            resp = (
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: application/json\r\n"
+                f"Content-Length: {len(body)}\r\n"
+                "Connection: close\r\n\r\n"
+                + body
+            )
+        else:
+            body = "not found"
+            resp = (
+                "HTTP/1.1 404 Not Found\r\n"
+                f"Content-Length: {len(body)}\r\n"
+                "Connection: close\r\n\r\n"
+                + body
+            )
+
+        writer.write(resp.encode())
+        await writer.drain()
+        writer.close()
+
+    try:
+        server = await asyncio.start_server(_handle, "0.0.0.0", port)
+        logger.info("Health server listening on port %d", port)
+        return server
+    except Exception as e:
+        logger.warning("Health server failed to start on port %d: %s", port, e)
+        return None
+
+
 # ── Async run (NO run_polling — manual control) ──────────────────────────────
 
 async def _run_bot() -> None:
@@ -165,6 +212,9 @@ async def _run_bot() -> None:
 
     RESTART_DELAY = 5
     attempt = 0
+
+    # Start health check server ONCE (survives bot restarts)
+    health_server = await _start_health_server()
 
     while True:
         attempt += 1
