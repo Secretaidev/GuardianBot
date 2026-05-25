@@ -12,18 +12,27 @@
   <img src="https://img.shields.io/badge/telegram-bot%20api-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram"/>
   <img src="https://img.shields.io/badge/mongodb-atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License"/>
-  <img src="https://img.shields.io/badge/deploy-railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white" alt="Railway"/>
-  <img src="https://img.shields.io/badge/deploy-render-46E3B7?style=for-the-badge&logo=render&logoColor=white" alt="Render"/>
+</p>
+
+<p align="center">
+  <a href="https://t.me/RoseManagementBot"><img src="https://img.shields.io/badge/bot-@RoseManagementBot-26A5E4?style=flat-square&logo=telegram" alt="Bot"/></a>
+  <a href="https://t.me/NexonBotz"><img src="https://img.shields.io/badge/support-@NexonBotz-26A5E4?style=flat-square&logo=telegram" alt="Support"/></a>
 </p>
 
 ---
 
-## ⚡ What is GuardianBot?
+## ⚡ What is ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ?
 
-GuardianBot is an **ultra-advanced** Telegram group management bot built for performance, power, and beauty. Every response is rendered in **Unicode small caps** for a distinctive premium look. Designed for groups of any size — from 10 members to 100,000+.
+An **ultra-advanced** Telegram group management bot built for performance, power, and beauty. Every response is rendered in **Unicode small caps** for a distinctive premium look. Designed for groups of any size — from 10 members to 100,000+.
 
 > **Zero third-party APIs.** No chatbot, no AI services, no external keys.  
 > Pure group management. Raw power. Clean code.
+
+| | |
+|---|---|
+| 🤖 **Bot** | [@RoseManagementBot](https://t.me/RoseManagementBot) |
+| 📢 **Support** | [@NexonBotz](https://t.me/NexonBotz) |
+| 👑 **Owner** | **𝐒𝐄𝐂𝐑𝐄𝐓** |
 
 ---
 
@@ -46,7 +55,7 @@ GuardianBot is an **ultra-advanced** Telegram group management bot built for per
 | **Filters** | `/filter`, `/stop`, `/filters` |
 | **Notes** | `/save`, `#name`, `/get`, `/clear`, `/notes`, `/clearall` |
 | **Locks** | `/lock`, `/unlock`, `/locks` (20 lockable types) |
-| **Blocklist** | `/addblock`, `/rmblock`, `/blocklist`, `/blockmode`, `/clearblock` |
+| **Blocklist** | `/addblocklist`, `/rmblocklist`, `/blocklist`, `/setblocklistmode` |
 | **Anti-Flood** | `/setflood`, `/flood`, `/setfloodmode` |
 
 ### 🌐 Advanced
@@ -66,35 +75,30 @@ GuardianBot is an **ultra-advanced** Telegram group management bot built for per
 
 ### 🎨 Design
 - **Unicode Small Caps** — every response in premium ᴀ-ᴢ typography
-- **Nested Button Menus** — ⚔️ Moderation → 🤖 Automation → 🌐 Advanced → 👑 Owner
-- **Interactive Sub-Buttons** — drill-down help with back/close navigation
+- **3-Level Interactive Menus** — Module → Command buttons → Command detail
 - **Emoji-Rich Responses** — every action has visual feedback
-- **Log Channel** — all mod actions logged to private Telegram channel (unlimited cloud)
+- **Log Channel** — all mod actions logged to private Telegram channel
 
 ### ⚡ Performance
-- **In-Memory TTL Cache** — admin lists, settings, blocklists cached to minimize DB hits
+- **In-Memory TTL Cache** — admin lists, settings, blocklists cached
 - **Connection Pooling** — MongoDB with 50-connection pool, retry writes
 - **Async Everything** — python-telegram-bot v20+ with motor async MongoDB
-- **Server Log Rotation** — 5MB rotating files, auto-cleanup of old logs
-- **Rate-Limited Logging** — 18 msg/sec to Telegram channel, never hits flood limits
+- **Auto-Restart** — immortal loop, bot never stays dead
+- **Server Log Rotation** — 5MB rotating files, auto-cleanup
 
 ---
 
 ## 🚀 Quick Start
 
 ```bash
-# Clone
 git clone https://github.com/Secretaidev/GuardianBot.git
 cd GuardianBot
 
-# Configure
 cp .env.example .env
 # Edit .env with your BOT_TOKEN, MONGO_URI, LOG_CHANNEL_ID, OWNER_ID
 
-# Install
 pip install -r requirements.txt
 
-# Run
 python -m bot
 ```
 
@@ -122,7 +126,7 @@ docker run -d --env-file .env --name guardianbot guardianbot
 
 1. Fork this repo
 2. Create a **Background Worker** on [Render](https://render.com)
-3. Connect your repo — `render.yaml` auto-configures everything
+3. Connect your repo — `render.yaml` auto-configures
 4. Set env vars → Deploy
 
 ---
@@ -130,58 +134,50 @@ docker run -d --env-file .env --name guardianbot guardianbot
 ## 🏗️ Architecture
 
 ```
-GuardianBot/
-├── bot/
-│   ├── __main__.py          # async entrypoint
-│   ├── config.py            # env loader with validation
-│   ├── fonts.py             # Unicode small caps engine
-│   ├── logger.py            # dual-sink: console + Telegram channel
-│   ├── database/            # MongoDB async layer (motor)
-│   │   ├── mongo.py         # connection pool, indexes
-│   │   ├── users_db.py      # user tracking
-│   │   ├── chats_db.py      # per-chat settings
-│   │   ├── warns_db.py      # warning records
-│   │   ├── notes_db.py      # saved notes
-│   │   ├── filters_db.py    # auto-reply filters
-│   │   ├── feds_db.py       # federation system
-│   │   ├── blocklist_db.py  # word blocklist
-│   │   └── antiflood_db.py  # flood tracking
-│   ├── helpers/             # shared utilities
-│   │   ├── buttons.py       # nested sub-menu builder
-│   │   ├── cache.py         # TTL cache layer
-│   │   ├── decorators.py    # @admin_required, @owner_everywhere
-│   │   ├── extractors.py    # user/reason extraction
-│   │   ├── permissions.py   # permission checkers
-│   │   ├── time_parser.py   # duration parsing
-│   │   └── autodelete.py    # server log rotation
-│   └── modules/             # 20 feature modules
-│       ├── start.py         # /start, /help with nested menus
-│       ├── admin.py         # promote/demote/adminlist
-│       ├── bans.py          # ban/kick system
-│       ├── mutes.py         # mute system
-│       ├── warns.py         # warning system
-│       ├── welcome.py       # welcome/goodbye messages
-│       ├── filters.py       # auto-reply filters
-│       ├── notes.py         # saved notes
-│       ├── locks.py         # content locks
-│       ├── blocklist.py     # word blocklist
-│       ├── antiflood.py     # flood protection
-│       ├── reports.py       # @admin reports
-│       ├── pins.py          # message pinning
-│       ├── purge.py         # bulk delete
-│       ├── rules.py         # group rules
-│       ├── federation.py    # cross-group bans
-│       ├── disable.py       # command disabling
-│       ├── maintenance.py   # maintenance mode
-│       ├── users.py         # user tracking
-│       └── stats.py         # bot statistics
-├── .env.example
-├── Dockerfile
-├── Procfile
-├── railway.toml
-├── render.yaml
-├── requirements.txt
-└── run.py
+bot/
+├── __main__.py          # async entrypoint with auto-restart
+├── config.py            # env loader with validation
+├── fonts.py             # Unicode small caps engine
+├── logger.py            # dual-sink: console + Telegram channel
+├── database/
+│   ├── mongo.py         # connection pool, indexes
+│   ├── users_db.py      # user tracking
+│   ├── chats_db.py      # per-chat settings
+│   ├── warns_db.py      # warning records
+│   ├── notes_db.py      # saved notes
+│   ├── filters_db.py    # auto-reply filters
+│   ├── feds_db.py       # federation system
+│   ├── blocklist_db.py  # word blocklist
+│   └── antiflood_db.py  # flood tracking
+├── helpers/
+│   ├── buttons.py       # 3-level interactive menu builder
+│   ├── cache.py         # TTL cache layer
+│   ├── decorators.py    # @admin_required, @owner_everywhere
+│   ├── extractors.py    # user/reason extraction
+│   ├── permissions.py   # permission checkers
+│   ├── time_parser.py   # duration parsing
+│   └── autodelete.py    # server log rotation
+└── modules/             # 20 feature modules
+    ├── start.py         # /start, /help with 3-level menus
+    ├── admin.py         # promote/demote/adminlist
+    ├── bans.py          # ban/kick system
+    ├── mutes.py         # mute system
+    ├── warns.py         # warning system
+    ├── welcome.py       # welcome/goodbye messages
+    ├── filters.py       # auto-reply filters
+    ├── notes.py         # saved notes
+    ├── locks.py         # content locks
+    ├── blocklist.py     # word blocklist
+    ├── antiflood.py     # flood protection
+    ├── reports.py       # @admin reports
+    ├── pins.py          # message pinning
+    ├── purge.py         # bulk delete
+    ├── rules.py         # group rules
+    ├── federation.py    # cross-group bans
+    ├── disable.py       # command disabling
+    ├── maintenance.py   # maintenance mode
+    ├── users.py         # user tracking
+    └── stats.py         # bot statistics
 ```
 
 ---
@@ -206,7 +202,7 @@ GuardianBot/
 ## 👑 Owner Features
 
 ### God Mode
-The owner (defined by `OWNER_ID`) has **full powers** in every group where GuardianBot is admin. Whatever the bot can do, the owner can do — ban, mute, promote, delete, pin — regardless of the owner's admin status in that group.
+The owner (defined by `OWNER_ID`) has **full powers** in every group where the bot is admin. Whatever the bot can do, the owner can do — ban, mute, promote, delete, pin — regardless of the owner's admin status in that group.
 
 ### Maintenance Mode
 ```
@@ -214,7 +210,6 @@ The owner (defined by `OWNER_ID`) has **full powers** in every group where Guard
 /maintenance off           → Broadcasts "back online" to ALL groups
 /maintenance status        → Check current mode
 ```
-During maintenance, ALL commands are blocked for everyone except the owner. Users see a styled maintenance banner.
 
 ---
 
@@ -226,5 +221,5 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <p align="center">
   <b>Crafted with ⚡ by 𝐒𝐄𝐂𝐑𝐄𝐓</b><br>
-  <i>@its_me_secret</i>
+  <a href="https://t.me/RoseManagementBot">@RoseManagementBot</a> · <a href="https://t.me/NexonBotz">@NexonBotz</a>
 </p>

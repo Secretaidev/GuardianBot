@@ -54,7 +54,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ],
             [
                 InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{BOT_USERNAME}?startgroup=start"),
-                InlineKeyboardButton(f"👑 {sc('owner')}", url="https://t.me/RoseManagementBot"),
+                InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/NexonBotz"),
             ],
         ])
         await update.effective_message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
@@ -194,7 +194,7 @@ async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             ],
             [
                 InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{BOT_USERNAME}?startgroup=start"),
-                InlineKeyboardButton(f"👑 {sc('owner')}", url="https://t.me/RoseManagementBot"),
+                InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/NexonBotz"),
             ],
         ])
         await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
@@ -261,11 +261,12 @@ async def cmd_ping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def cmd_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (
         f"<b>🛡️ ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b>\n\n"
-        f"👑 {sc('owner')}: <b>𝐒𝐄𝐂𝐑𝐄𝐓</b> (@its_me_secret)\n"
         f"🐍 {sc('language')}: Python 3.11+\n"
         f"📦 {sc('framework')}: python-telegram-bot\n"
         f"🗄️ {sc('database')}: MongoDB\n"
-        f"🔗 {sc('source')}: <a href='https://github.com/Secretaidev/GuardianBot'>GitHub</a>\n"
+        f"👑 {sc('owner')}: <b>𝐒𝐄𝐂𝐑𝐄𝐓</b> (@its_me_secret)\n"
+        f"📢 {sc('support')}: @NexonBotz\n"
+        f"🤖 {sc('bot')}: @RoseManagementBot\n"
     )
     await update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
 

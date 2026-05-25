@@ -269,7 +269,7 @@ async def blocklist_watcher(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         context.bot, action=f"blocklist {mode}: {trigger}", chat_id=chat.id,
         chat_title=chat.title or '', target_user_id=user.id,
         target_username=user.full_name, performed_by_id=context.bot.id,
-        performed_by_username="GuardianBot",
+        performed_by_username="RoseManagementBot",
     )
 
 

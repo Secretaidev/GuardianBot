@@ -180,7 +180,7 @@ async def _post_init(app: Application) -> None:
 
 
 async def _post_stop(app: Application) -> None:
-    logger.info("Shutting down...")
+    logger.info("Polling cycle ended — cleaning up (will auto-restart)...")
     try:
         await TelegramChannelHandler.stop()
     except Exception:
@@ -252,37 +252,49 @@ def _build_and_run() -> None:
 
 
 def main() -> None:
-    """Immortal bot loop — auto-restarts on any crash.
-    Only Ctrl+C (KeyboardInterrupt) can kill it."""
+    """Immortal bot — NEVER dies unless you press Ctrl+C.
+    If run_polling exits for ANY reason (network, signal, error),
+    it waits 5s and restarts automatically."""
     import time as _time
 
-    MAX_BACKOFF = 60  # max wait between restarts (seconds)
-    backoff = 5       # start at 5 seconds
+    RESTART_DELAY = 5
+    attempt = 0
 
     while True:
+        attempt += 1
         try:
+            logger.info("=== Starting bot (attempt #%d) ===", attempt)
             _build_and_run()
-            # if run_polling returns normally, it means graceful shutdown
-            logger.info("Polling stopped gracefully.")
-            break
+            # run_polling returned — this means something killed it
+            # (SIGTERM from platform, network reset, etc.)
+            # DO NOT break — restart instead
+            logger.warning(
+                "Polling stopped unexpectedly — restarting in %ds...",
+                RESTART_DELAY,
+            )
+            _time.sleep(RESTART_DELAY)
+
         except KeyboardInterrupt:
-            logger.info("Shutdown via Ctrl+C.")
+            # ONLY way to kill the bot — manual Ctrl+C
+            logger.info("Shutdown via Ctrl+C. Goodbye!")
             break
+
         except SystemExit as e:
             if e.code == 0:
+                # explicit clean exit (shouldn't happen, but just in case)
+                logger.info("Clean exit requested.")
                 break
-            logger.error("SystemExit with code %s — restarting in %ds...", e.code, backoff)
-            _time.sleep(backoff)
-            backoff = min(backoff * 2, MAX_BACKOFF)
+            logger.error(
+                "SystemExit(%s) — restarting in %ds...", e.code, RESTART_DELAY,
+            )
+            _time.sleep(RESTART_DELAY)
+
         except Exception as exc:
             logger.error(
-                "Bot crashed: %s — restarting in %ds...", exc, backoff,
-                exc_info=True,
+                "Bot crashed: %s — restarting in %ds...",
+                exc, RESTART_DELAY, exc_info=True,
             )
-            _time.sleep(backoff)
-            backoff = min(backoff * 2, MAX_BACKOFF)
-        else:
-            break
+            _time.sleep(RESTART_DELAY)
 
 
 if __name__ == "__main__":

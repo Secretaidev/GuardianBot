@@ -14,7 +14,7 @@ services:
       - key: OWNER_ID
         sync: false
       - key: BOT_NAME
-        value: GuardianBot
+        value: ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ
       - key: WARN_LIMIT
         value: "3"
     autoDeploy: true

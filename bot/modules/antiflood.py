@@ -191,7 +191,7 @@ async def flood_watcher(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             context.bot, action=f"anti-flood: {mode}", chat_id=chat.id,
             chat_title=chat.title or '', target_user_id=user.id,
             target_username=user.full_name, performed_by_id=context.bot.id,
-            performed_by_username="GuardianBot",
+            performed_by_username="RoseManagementBot",
         )
     except Exception as e:
         logger.warning(f"Anti-flood action failed: {e}")
