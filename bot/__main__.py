@@ -49,6 +49,13 @@ MODULES: list[str] = [
     "bot.modules.maintenance",
     "bot.modules.users",
     "bot.modules.stats",
+    "bot.modules.approval",
+    "bot.modules.antiraid",
+    "bot.modules.captcha",
+    "bot.modules.cleancommands",
+    "bot.modules.connections",
+    "bot.modules.formatting",
+    "bot.modules.logchannel",
 ]
 
 
@@ -144,7 +151,7 @@ def _print_banner(username: str, bot_id: int) -> None:
         f"\n"
         f"  ╔{sep}╗\n"
         f"  ║{'':^44}║\n"
-        f"  ║{sc('guardian bot — online'):^44}║\n"
+        f"  ║{'Rose — Online':^44}║\n"
         f"  ║{'':^44}║\n"
         f"  ╠{sep}╣\n"
         f"  {row('name', BOT_NAME)}\n"

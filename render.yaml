@@ -1,6 +1,6 @@
 services:
   - type: worker
-    name: guardianbot
+    name: rose
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
@@ -14,7 +14,7 @@ services:
       - key: OWNER_ID
         sync: false
       - key: BOT_NAME
-        value: ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ
+        value: Rose
       - key: WARN_LIMIT
         value: "3"
     autoDeploy: true

@@ -1,0 +1,1440 @@
+[1mdiff --git a/.env.example b/.env.example[m
+[1mindex ef8cabb..25faeea 100644[m
+[1m--- a/.env.example[m
+[1m+++ b/.env.example[m
+[36m@@ -1,20 +1,19 @@[m
+ # ═══════════════════════════════════════════════════════════[m
+[31m-#  ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — Environment Configuration[m
+[32m+[m[32m#  Rose — Environment Configuration[m
+ #  Crafted by 𝐒𝐄𝐂𝐑𝐄𝐓[m
+ # ═══════════════════════════════════════════════════════════[m
+ [m
+ # ── Required ──────────────────────────────────────────────[m
+ BOT_TOKEN=your-bot-token-from-botfather[m
+[31m-MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/guardianbot[m
+[32m+[m[32mMONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/rose[m
+ LOG_CHANNEL_ID=-100xxxxxxxxxx[m
+ OWNER_ID=your-numeric-telegram-id[m
+ [m
+ # ── Optional ──────────────────────────────────────────────[m
+[31m-BOT_NAME=ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ[m
+[32m+[m[32mBOT_NAME=Rose[m
+ BOT_USERNAME=RoseManagementBot[m
+ WARN_LIMIT=3[m
+ SUDO_USERS=[m
+ FLOOD_LIMIT=5[m
+ FLOOD_TIME=5[m
+ LOG_LEVEL=INFO[m
+[31m-GUARDIAN_DEBUG=false[m
+[1mdiff --git a/README.md b/README.md[m
+[1mindex 9f2cf72..c1c48d6 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -1,6 +1,4 @@[m
+[31m-<h1 align="center">[m
+[31m-  🛡️ ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ[m
+[31m-</h1>[m
+[32m+[m[32m<h1 align="center">🌹 Rose</h1>[m
+ [m
+ <p align="center">[m
+   <b>The most powerful Telegram group management bot.</b><br>[m
+[36m@@ -11,80 +9,45 @@[m
+   <img src="https://img.shields.io/badge/python-3.11+-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>[m
+   <img src="https://img.shields.io/badge/telegram-bot%20api-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram"/>[m
+   <img src="https://img.shields.io/badge/mongodb-atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>[m
+[31m-  <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License"/>[m
+ </p>[m
+ [m
+ <p align="center">[m
+[31m-  <a href="https://t.me/RoseManagementBot"><img src="https://img.shields.io/badge/bot-@RoseManagementBot-26A5E4?style=flat-square&logo=telegram" alt="Bot"/></a>[m
+[31m-  <a href="https://t.me/NexonBotz"><img src="https://img.shields.io/badge/support-@NexonBotz-26A5E4?style=flat-square&logo=telegram" alt="Support"/></a>[m
+[32m+[m[32m  <a href="https://t.me/RoseManagementBot">@RoseManagementBot</a> · <a href="https://t.me/SecretzBotz">@SecretzBotz</a>[m
+ </p>[m
+ [m
+ ---[m
+ [m
+[31m-## ⚡ What is ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ?[m
+[31m-[m
+[31m-An **ultra-advanced** Telegram group management bot built for performance, power, and beauty. Every response is rendered in **Unicode small caps** for a distinctive premium look. Designed for groups of any size — from 10 members to 100,000+.[m
+[31m-[m
+[31m-> **Zero third-party APIs.** No chatbot, no AI services, no external keys.  [m
+[31m-> Pure group management. Raw power. Clean code.[m
+[31m-[m
+[31m-| | |[m
+[31m-|---|---|[m
+[31m-| 🤖 **Bot** | [@RoseManagementBot](https://t.me/RoseManagementBot) |[m
+[31m-| 📢 **Support** | [@NexonBotz](https://t.me/NexonBotz) |[m
+[31m-| 👑 **Owner** | **𝐒𝐄𝐂𝐑𝐄𝐓** |[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 🔥 Features[m
+[31m-[m
+[31m-### ⚔️ Moderation[m
+[31m-| Feature | Commands |[m
+[31m-|---------|----------|[m
+[31m-| **Bans** | `/ban`, `/tban`, `/unban`, `/sban`, `/kick`, `/kickme` |[m
+[31m-| **Mutes** | `/mute`, `/tmute`, `/unmute`, `/smute` |[m
+[31m-| **Warns** | `/warn`, `/dwarn`, `/unwarn`, `/resetwarns`, `/warns`, `/warnlimit`, `/warnmode` |[m
+[31m-| **Reports** | `@admin`, `/report`, `/reports on\|off` |[m
+[31m-| **Pins** | `/pin`, `/unpin`, `/unpinall`, `/pinned` |[m
+[31m-| **Purge** | `/purge`, `/purge N`, `/del` |[m
+[31m-[m
+[31m-### 🤖 Automation[m
+[31m-| Feature | Commands |[m
+[31m-|---------|----------|[m
+[31m-| **Welcome** | `/setwelcome`, `/welcome on\|off`, `/setgoodbye`, `/cleanwelcome` |[m
+[31m-| **Filters** | `/filter`, `/stop`, `/filters` |[m
+[31m-| **Notes** | `/save`, `#name`, `/get`, `/clear`, `/notes`, `/clearall` |[m
+[31m-| **Locks** | `/lock`, `/unlock`, `/locks` (20 lockable types) |[m
+[31m-| **Blocklist** | `/addblocklist`, `/rmblocklist`, `/blocklist`, `/setblocklistmode` |[m
+[31m-| **Anti-Flood** | `/setflood`, `/flood`, `/setfloodmode` |[m
+[31m-[m
+[31m-### 🌐 Advanced[m
+[31m-| Feature | Commands |[m
+[31m-|---------|----------|[m
+[31m-| **Rules** | `/setrules`, `/rules`, `/clearrules`, `/privaterules` |[m
+[31m-| **Federation** | `/newfed`, `/joinfed`, `/leavefed`, `/fedban`, `/unfedban`, `/fedinfo`, `/fedadmins` |[m
+[31m-| **Disable** | `/disable`, `/enable`, `/disabled`, `/disableable` |[m
+[31m-[m
+[31m-### 👑 Owner Powers[m
+[31m-| Feature | Commands |[m
+[31m-|---------|----------|[m
+[31m-| **God Mode** | Owner has ALL bot powers in every chat where bot is admin |[m
+[31m-| **Maintenance** | `/maintenance on\|off` — kill switch with broadcast to all chats & DMs |[m
+[31m-| **Stats** | `/stats` — system vitals, DB status, uptime, memory |[m
+[31m-| **Broadcast** | `/broadcast` — send message to all groups |[m
+[31m-[m
+[31m-### 🎨 Design[m
+[31m-- **Unicode Small Caps** — every response in premium ᴀ-ᴢ typography[m
+[31m-- **3-Level Interactive Menus** — Module → Command buttons → Command detail[m
+[31m-- **Emoji-Rich Responses** — every action has visual feedback[m
+[31m-- **Log Channel** — all mod actions logged to private Telegram channel[m
+[31m-[m
+[31m-### ⚡ Performance[m
+[31m-- **In-Memory TTL Cache** — admin lists, settings, blocklists cached[m
+[31m-- **Connection Pooling** — MongoDB with 50-connection pool, retry writes[m
+[31m-- **Async Everything** — python-telegram-bot v20+ with motor async MongoDB[m
+[31m-- **Auto-Restart** — immortal loop, bot never stays dead[m
+[31m-- **Server Log Rotation** — 5MB rotating files, auto-cleanup[m
+[32m+[m[32m## ⚡ Features — 27 Modules[m
+[32m+[m
+[32m+[m[32m| Module | Commands |[m
+[32m+[m[32m|--------|----------|[m
+[32m+[m[32m| **Admin** | promote, demote, title, adminlist, invitelink, setgtitle, setgdesc |[m
+[32m+[m[32m| **Antiflood** | setflood, setfloodmode, flood |[m
+[32m+[m[32m| **AntiRaid** | antiraid, raidtime, raidactionmode |[m
+[32m+[m[32m| **Approval** | approve, unapprove, approved |[m
+[32m+[m[32m| **Bans** | ban, tban, unban, sban, kick, kickme |[m
+[32m+[m[32m| **Blocklists** | addblocklist, rmblocklist, blocklist, setblocklistmode |[m
+[32m+[m[32m| **CAPTCHA** | captcha, captchamode, captchatime |[m
+[32m+[m[32m| **Clean Cmds** | cleancmds, cleanservice |[m
+[32m+[m[32m| **Connections** | connect, disconnect, connection |[m
+[32m+[m[32m| **Disabling** | disable, enable, disabled, disableable |[m
+[32m+[m[32m| **Federations** | newfed, joinfed, leavefed, fedban, unfedban, fedinfo |[m
+[32m+[m[32m| **Filters** | filter, stop, filters |[m
+[32m+[m[32m| **Formatting** | markdownhelp |[m
+[32m+[m[32m| **Greetings** | setwelcome, welcome, setgoodbye, goodbye, cleanwelcome |[m
+[32m+[m[32m| **Locks** | lock, unlock, locks |[m
+[32m+[m[32m| **Log Channels** | logchannel, setlog, unsetlog |[m
+[32m+[m[32m| **Misc** | id, info, ping, about |[m
+[32m+[m[32m| **Notes** | save, get, clear, notes, clearall |[m
+[32m+[m[32m| **Pin** | pin, unpin, unpinall, pinned |[m
+[32m+[m[32m| **Privacy** | privacy, deletedata |[m
+[32m+[m[32m| **Purges** | purge, del |[m
+[32m+[m[32m| **Reports** | report, reports |[m
+[32m+[m[32m| **Rules** | setrules, rules, clearrules, privaterules |[m
+[32m+[m[32m| **Topics** | newtopic, closetopic, opentopic |[m
+[32m+[m[32m| **Warnings** | warn, dwarn, unwarn, resetwarns, warns, warnlimit, warnmode |[m
+[32m+[m[32m| **Stats** | stats, broadcast |[m
+[32m+[m[32m| **Maintenance** | maintenance |[m
+ [m
+ ---[m
+ [m
+[36m@@ -93,133 +56,45 @@[m [mAn **ultra-advanced** Telegram group management bot built for performance, power[m
+ ```bash[m
+ git clone https://github.com/Secretaidev/GuardianBot.git[m
+ cd GuardianBot[m
+[31m-[m
+ cp .env.example .env[m
+ # Edit .env with your BOT_TOKEN, MONGO_URI, LOG_CHANNEL_ID, OWNER_ID[m
+[31m-[m
+ pip install -r requirements.txt[m
+[31m-[m
+ python -m bot[m
+ ```[m
+ [m
+[31m----[m
+[31m-[m
+ ## 🐳 Docker[m
+ [m
+ ```bash[m
+[31m-docker build -t guardianbot .[m
+[31m-docker run -d --env-file .env --name guardianbot guardianbot[m
+[32m+[m[32mdocker build -t rose .[m
+[32m+[m[32mdocker run -d --env-file .env --name rose rose[m
+ ```[m
+ [m
+[31m----[m
+[31m-[m
+ ## 🚂 Railway[m
+ [m
+[31m-1. Fork this repo[m
+[31m-2. Connect to [Railway](https://railway.app)[m
+[31m-3. Set environment variables[m
+[31m-4. Deploy — auto-starts via `Procfile`[m
+[31m-[m
+[31m----[m
+[32m+[m[32m1. Fork → Connect to Railway → Set env vars → Deploy[m
+ [m
+ ## 🎯 Render[m
+ [m
+[31m-1. Fork this repo[m
+[31m-2. Create a **Background Worker** on [Render](https://render.com)[m
+[31m-3. Connect your repo — `render.yaml` auto-configures[m
+[31m-4. Set env vars → Deploy[m
+[32m+[m[32m1. Fork → Background Worker on Render → `render.yaml` auto-configures[m
+ [m
+ ---[m
+ [m
+[31m-## 🏗️ Architecture[m
+[32m+[m[32m## 🏗 Architecture[m
+ [m
+ ```[m
+ bot/[m
+[31m-├── __main__.py          # async entrypoint with auto-restart[m
+[31m-├── config.py            # env loader with validation[m
+[31m-├── fonts.py             # Unicode small caps engine[m
+[31m-├── logger.py            # dual-sink: console + Telegram channel[m
+[31m-├── database/[m
+[31m-│   ├── mongo.py         # connection pool, indexes[m
+[31m-│   ├── users_db.py      # user tracking[m
+[31m-│   ├── chats_db.py      # per-chat settings[m
+[31m-│   ├── warns_db.py      # warning records[m
+[31m-│   ├── notes_db.py      # saved notes[m
+[31m-│   ├── filters_db.py    # auto-reply filters[m
+[31m-│   ├── feds_db.py       # federation system[m
+[31m-│   ├── blocklist_db.py  # word blocklist[m
+[31m-│   └── antiflood_db.py  # flood tracking[m
+[31m-├── helpers/[m
+[31m-│   ├── buttons.py       # 3-level interactive menu builder[m
+[31m-│   ├── cache.py         # TTL cache layer[m
+[31m-│   ├── decorators.py    # @admin_required, @owner_everywhere[m
+[31m-│   ├── extractors.py    # user/reason extraction[m
+[31m-│   ├── permissions.py   # permission checkers[m
+[31m-│   ├── time_parser.py   # duration parsing[m
+[31m-│   └── autodelete.py    # server log rotation[m
+[31m-└── modules/             # 20 feature modules[m
+[31m-    ├── start.py         # /start, /help with 3-level menus[m
+[31m-    ├── admin.py         # promote/demote/adminlist[m
+[31m-    ├── bans.py          # ban/kick system[m
+[31m-    ├── mutes.py         # mute system[m
+[31m-    ├── warns.py         # warning system[m
+[31m-    ├── welcome.py       # welcome/goodbye messages[m
+[31m-    ├── filters.py       # auto-reply filters[m
+[31m-    ├── notes.py         # saved notes[m
+[31m-    ├── locks.py         # content locks[m
+[31m-    ├── blocklist.py     # word blocklist[m
+[31m-    ├── antiflood.py     # flood protection[m
+[31m-    ├── reports.py       # @admin reports[m
+[31m-    ├── pins.py          # message pinning[m
+[31m-    ├── purge.py         # bulk delete[m
+[31m-    ├── rules.py         # group rules[m
+[31m-    ├── federation.py    # cross-group bans[m
+[31m-    ├── disable.py       # command disabling[m
+[31m-    ├── maintenance.py   # maintenance mode[m
+[31m-    ├── users.py         # user tracking[m
+[31m-    └── stats.py         # bot statistics[m
+[32m+[m[32m├── __main__.py          # async entrypoint with auto-restart + health server[m
+[32m+[m[32m├── config.py            # env loader[m
+[32m+[m[32m├── fonts.py             # text formatting[m
+[32m+[m[32m├── logger.py            # console + Telegram channel logging[m
+[32m+[m[32m├── database/            # MongoDB collections[m
+[32m+[m[32m├── helpers/             # decorators, buttons, cache, extractors[m
+[32m+[m[32m└── modules/             # 27 feature modules[m
+ ```[m
+ [m
+ ---[m
+ [m
+[31m-## 🔧 Configuration[m
+[31m-[m
+[31m-| Variable | Required | Description |[m
+[31m-|----------|----------|-------------|[m
+[31m-| `BOT_TOKEN` | ✅ | Bot token from @BotFather |[m
+[31m-| `MONGO_URI` | ✅ | MongoDB connection string |[m
+[31m-| `LOG_CHANNEL_ID` | ✅ | Telegram channel ID for logs |[m
+[31m-| `OWNER_ID` | ✅ | Your numeric Telegram user ID |[m
+[31m-| `BOT_NAME` | ❌ | Display name (default: ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ) |[m
+[31m-| `BOT_USERNAME` | ❌ | Bot @username |[m
+[31m-| `WARN_LIMIT` | ❌ | Warns before auto-action (default: 3) |[m
+[31m-| `SUDO_USERS` | ❌ | Comma-separated elevated user IDs |[m
+[31m-| `FLOOD_LIMIT` | ❌ | Max messages per window (default: 5) |[m
+[31m-| `LOG_LEVEL` | ❌ | DEBUG / INFO / WARNING / ERROR |[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 👑 Owner Features[m
+[31m-[m
+[31m-### God Mode[m
+[31m-The owner (defined by `OWNER_ID`) has **full powers** in every group where the bot is admin. Whatever the bot can do, the owner can do — ban, mute, promote, delete, pin — regardless of the owner's admin status in that group.[m
+[31m-[m
+[31m-### Maintenance Mode[m
+[31m-```[m
+[31m-/maintenance on [reason]   → Broadcasts maintenance banner to ALL groups + DMs[m
+[31m-/maintenance off           → Broadcasts "back online" to ALL groups[m
+[31m-/maintenance status        → Check current mode[m
+[31m-```[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 📜 License[m
+[31m-[m
+[31m-MIT License — see [LICENSE](LICENSE) for details.[m
+[31m-[m
+[31m----[m
+[31m-[m
+ <p align="center">[m
+[31m-  <b>Crafted with ⚡ by 𝐒𝐄𝐂𝐑𝐄𝐓</b><br>[m
+[31m-  <a href="https://t.me/RoseManagementBot">@RoseManagementBot</a> · <a href="https://t.me/NexonBotz">@NexonBotz</a>[m
+[32m+[m[32m  <b>Crafted by 𝐒𝐄𝐂𝐑𝐄𝐓</b><br>[m
+[32m+[m[32m  <a href="https://t.me/RoseManagementBot">@RoseManagementBot</a> · <a href="https://t.me/SecretzBotz">@SecretzBotz</a>[m
+ </p>[m
+[1mdiff --git a/bot/__init__.py b/bot/__init__.py[m
+[1mindex 512a028..b3c6cbe 100644[m
+[1m--- a/bot/__init__.py[m
+[1m+++ b/bot/__init__.py[m
+[36m@@ -1,3 +1 @@[m
+[31m-# bot/__init__.py[m
+[31m-# GuardianBot — ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ[m
+[31m-# Package marker for the bot package.[m
+[32m+[m[32m# Rose[m
+[1mdiff --git a/bot/__main__.py b/bot/__main__.py[m
+[1mindex 3bf1d25..cd6bde3 100644[m
+[1m--- a/bot/__main__.py[m
+[1m+++ b/bot/__main__.py[m
+[36m@@ -49,6 +49,13 @@[m [mMODULES: list[str] = [[m
+     "bot.modules.maintenance",[m
+     "bot.modules.users",[m
+     "bot.modules.stats",[m
+[32m+[m[32m    "bot.modules.approval",[m
+[32m+[m[32m    "bot.modules.antiraid",[m
+[32m+[m[32m    "bot.modules.captcha",[m
+[32m+[m[32m    "bot.modules.cleancommands",[m
+[32m+[m[32m    "bot.modules.connections",[m
+[32m+[m[32m    "bot.modules.formatting",[m
+[32m+[m[32m    "bot.modules.logchannel",[m
+ ][m
+ [m
+ [m
+[36m@@ -144,7 +151,7 @@[m [mdef _print_banner(username: str, bot_id: int) -> None:[m
+         f"\n"[m
+         f"  ╔{sep}╗\n"[m
+         f"  ║{'':^44}║\n"[m
+[31m-        f"  ║{sc('guardian bot — online'):^44}║\n"[m
+[32m+[m[32m        f"  ║{'Rose — Online':^44}║\n"[m
+         f"  ║{'':^44}║\n"[m
+         f"  ╠{sep}╣\n"[m
+         f"  {row('name', BOT_NAME)}\n"[m
+[1mdiff --git a/bot/config.py b/bot/config.py[m
+[1mindex e3753d5..77f8b9a 100644[m
+[1m--- a/bot/config.py[m
+[1m+++ b/bot/config.py[m
+[36m@@ -155,7 +155,7 @@[m [mpermission checks and can run owner-only commands."""[m
+ [m
+ # ── Optional configuration ────────────────────────────────────────────────────[m
+ [m
+[31m-BOT_NAME: Final[str] = os.getenv("BOT_NAME", "ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ").strip() or "ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ"[m
+[32m+[m[32mBOT_NAME: Final[str] = os.getenv("BOT_NAME", "Rose").strip() or "Rose"[m
+ """Human-readable display name shown in help messages and status output."""[m
+ [m
+ BOT_USERNAME: Final[str] = os.getenv("BOT_USERNAME", "RoseManagementBot").strip().lstrip("@")[m
+[1mdiff --git a/bot/database/__init__.py b/bot/database/__init__.py[m
+[1mindex 19d6446..b3c6cbe 100644[m
+[1m--- a/bot/database/__init__.py[m
+[1m+++ b/bot/database/__init__.py[m
+[36m@@ -1,2 +1 @@[m
+[31m-# bot/database/__init__.py[m
+[31m-# GuardianBot — database sub-package marker.[m
+[32m+[m[32m# Rose[m
+[1mdiff --git a/bot/helpers/__init__.py b/bot/helpers/__init__.py[m
+[1mindex 2b62b0b..b3c6cbe 100644[m
+[1m--- a/bot/helpers/__init__.py[m
+[1m+++ b/bot/helpers/__init__.py[m
+[36m@@ -1,2 +1 @@[m
+[31m-# bot/helpers/__init__.py[m
+[31m-# GuardianBot — helpers sub-package marker.[m
+[32m+[m[32m# Rose[m
+[1mdiff --git a/bot/helpers/buttons.py b/bot/helpers/buttons.py[m
+[1mindex fdfc8e2..2240be0 100644[m
+[1m--- a/bot/helpers/buttons.py[m
+[1m+++ b/bot/helpers/buttons.py[m
+[36m@@ -1,30 +1,21 @@[m
+ """[m
+[31m-ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ — Interactive inline keyboard system.[m
+[31m-[m
+[31m-3-level drill-down:[m
+[31m-  Main Menu  →  Module (sub-buttons per command)  →  Command detail[m
+[31m-[m
+[31m-Crafted by 𝐒𝐄𝐂𝐑𝐄𝐓[m
+[32m+[m[32mRose — Inline keyboard system.[m
+[32m+[m[32mClean, fast, Rose-style 3-level navigation.[m
+ """[m
+ from __future__ import annotations[m
+[31m-[m
+[31m-import math[m
+ from typing import Any[m
+[32m+[m[32mimport math[m
+ [m
+ from telegram import InlineKeyboardButton as Btn, InlineKeyboardMarkup[m
+ [m
+[31m-from bot.fonts import sc[m
+[31m-[m
+[31m-# ── tiny helpers ──────────────────────────────────────────────────────────────[m
+ [m
+[31m-def _row(*btns): return list(btns)[m
+[32m+[m[32m# ── helpers ───────────────────────────────────────────────────────────────────[m
+ [m
+ def _back(cb: str) -> Btn:[m
+[31m-    return Btn(f"🔙 {sc('back')}", callback_data=cb)[m
+[32m+[m[32m    return Btn("« Back", callback_data=cb)[m
+ [m
+ def _close() -> Btn:[m
+[31m-    return Btn(f"❌ {sc('close')}", callback_data="help:close")[m
+[31m-[m
+[32m+[m[32m    return Btn("Close", callback_data="help:close")[m
+ [m
+ def build_menu(buttons: list[Btn], n_cols: int,[m
+                header: list[Btn] | None = None,[m
+[36m@@ -38,212 +29,305 @@[m [mdef build_menu(buttons: list[Btn], n_cols: int,[m
+         rows.append(footer)[m
+     return rows[m
+ [m
+[31m-[m
+ def paginate(items: list[Any], page: int, page_size: int, prefix: str) -> list[Btn]:[m
+     pages = max(1, math.ceil(len(items) / page_size))[m
+     nav = [][m
+     if page > 0:[m
+[31m-        nav.append(Btn(f"⬅ {sc('prev')}", callback_data=f"{prefix}:{page - 1}"))[m
+[32m+[m[32m        nav.append(Btn("«", callback_data=f"{prefix}:{page - 1}"))[m
+     nav.append(Btn(f"{page + 1}/{pages}", callback_data="."))[m
+     if page < pages - 1:[m
+[31m-        nav.append(Btn(f"{sc('next')} ➡", callback_data=f"{prefix}:{page + 1}"))[m
+[32m+[m[32m        nav.append(Btn("»", callback_data=f"{prefix}:{page + 1}"))[m
+     return nav[m
+ [m
+[31m-[m
+ def confirm_keyboard(yes_cb: str, no_cb: str) -> InlineKeyboardMarkup:[m
+     return InlineKeyboardMarkup([[m
+[31m-        [Btn(f"✅ {sc('yes')}", callback_data=yes_cb),[m
+[31m-         Btn(f"❌ {sc('no')}", callback_data=no_cb)][m
+[32m+[m[32m        [Btn("Yes", callback_data=yes_cb), Btn("No", callback_data=no_cb)][m
+     ])[m
+ [m
+ [m
+ # ══════════════════════════════════════════════════════════════════════════════[m
+[31m-# MODULE REGISTRY — each module has emoji, label, and sub-commands[m
+[32m+[m[32m# MODULE REGISTRY — 27 modules, Rose-style[m
+ # ══════════════════════════════════════════════════════════════════════════════[m
+ [m
+ MODULES = {[m
+[31m-    "BANS": {[m
+[31m-        "emoji": "🚫",[m
+[32m+[m[32m    "ADMIN": {[m
+[32m+[m[32m        "label": "Admin",[m
+[32m+[m[32m        "desc": "Manage admins, promotions, and group settings.",[m
+         "cmds": {[m
+[31m-            "ban":    "ʙᴀɴ ᴀ ᴜꜱᴇʀ ᴘᴇʀᴍᴀɴᴇɴᴛʟʏ.\nᴜꜱᴀɢᴇ: /ban <user> [reason]",[m
+[31m-            "tban":   "ᴛᴇᴍᴘ ʙᴀɴ ꜰᴏʀ ᴀ ᴅᴜʀᴀᴛɪᴏɴ.\nᴜꜱᴀɢᴇ: /tban <user> <time> [reason]\nᴇx: /tban @user 2h spam",[m
+[31m-            "unban":  "ᴜɴʙᴀɴ ᴀ ᴘʀᴇᴠɪᴏᴜꜱʟʏ ʙᴀɴɴᴇᴅ ᴜꜱᴇʀ.\nᴜꜱᴀɢᴇ: /unban <user>",[m
+[31m-            "sban":   "ꜱɪʟᴇɴᴛ ʙᴀɴ — ᴅᴇʟᴇᴛᴇꜱ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ᴍꜱɢ ᴛᴏᴏ.\nᴜꜱᴀɢᴇ: /sban <user>",[m
+[31m-            "kick":   "ᴋɪᴄᴋ ᴀ ᴜꜱᴇʀ (ᴛʜᴇʏ ᴄᴀɴ ʀᴇᴊᴏɪɴ).\nᴜꜱᴀɢᴇ: /kick <user> [reason]",[m
+[31m-            "kickme": "ᴋɪᴄᴋ ʏᴏᴜʀꜱᴇʟꜰ ꜰʀᴏᴍ ᴛʜᴇ ɢʀᴏᴜᴘ.",[m
+[32m+[m[32m            "promote":    "Promote a user to admin.\nUsage: /promote <user> [title]",[m
+[32m+[m[32m            "demote":     "Demote an admin.\nUsage: /demote <user>",[m
+[32m+[m[32m            "title":      "Set custom admin title (max 16 chars).\nUsage: /title <user> <title>",[m
+[32m+[m[32m            "adminlist":  "List all admins in this group.",[m
+[32m+[m[32m            "invitelink": "Get the group invite link.",[m
+[32m+[m[32m            "setgtitle":  "Change group title.\nUsage: /setgtitle <text>",[m
+[32m+[m[32m            "setgdesc":   "Change group description.\nUsage: /setgdesc <text>",[m
+         },[m
+     },[m
+[31m-    "MUTES": {[m
+[31m-        "emoji": "🔇",[m
+[32m+[m[32m    "ANTIFLOOD": {[m
+[32m+[m[32m        "label": "Antiflood",[m
+[32m+[m[32m        "desc": "Prevent message flooding in your group.",[m
+         "cmds": {[m
+[31m-            "mute":   "ᴍᴜᴛᴇ ᴀ ᴜꜱᴇʀ ɪɴᴅᴇꜰɪɴɪᴛᴇʟʏ.\nᴜꜱᴀɢᴇ: /mute <user> [reason]",[m
+[31m-            "tmute":  "ᴛᴇᴍᴘ ᴍᴜᴛᴇ ꜰᴏʀ ᴀ ᴅᴜʀᴀᴛɪᴏɴ.\nᴜꜱᴀɢᴇ: /tmute <user> <time>",[m
+[31m-            "unmute": "ᴜɴᴍᴜᴛᴇ ᴀ ᴍᴜᴛᴇᴅ ᴜꜱᴇʀ.\nᴜꜱᴀɢᴇ: /unmute <user>",[m
+[31m-            "smute":  "ꜱɪʟᴇɴᴛ ᴍᴜᴛᴇ — ɴᴏ ᴍᴇꜱꜱᴀɢᴇ, ᴊᴜꜱᴛ ᴍᴜᴛᴇ.\nᴜꜱᴀɢᴇ: /smute <user>",[m
+[32m+[m[32m            "setflood":     "Set flood limit (0 = disabled).\nUsage: /setflood <n>",[m
+[32m+[m[32m            "setfloodmode": "Set action: ban/kick/mute/tban/tmute.\nUsage: /setfloodmode <action>",[m
+[32m+[m[32m            "flood":        "Show current anti-flood settings.",[m
+         },[m
+     },[m
+[31m-    "WARNS": {[m
+[31m-        "emoji": "⚠️",[m
+[32m+[m[32m    "ANTIRAID": {[m
+[32m+[m[32m        "label": "AntiRaid",[m
+[32m+[m[32m        "desc": "Protect against mass-join raids.",[m
+         "cmds": {[m
+[31m-            "warn":       "ɪꜱꜱᴜᴇ ᴀ ᴡᴀʀɴɪɴɢ.\nᴜꜱᴀɢᴇ: /warn <user> [reason]",[m
+[31m-            "dwarn":      "ᴡᴀʀɴ + ᴅᴇʟᴇᴛᴇ ᴛʜᴇ ʀᴇᴘʟɪᴇᴅ ᴍꜱɢ.\nᴜꜱᴀɢᴇ: reply /dwarn [reason]",[m
+[31m-            "unwarn":     "ʀᴇᴍᴏᴠᴇ ʟᴀꜱᴛ ᴡᴀʀɴɪɴɢ.\nᴜꜱᴀɢᴇ: /unwarn <user>",[m
+[31m-            "resetwarns": "ᴄʟᴇᴀʀ ᴀʟʟ ᴡᴀʀɴꜱ ꜰᴏʀ ᴀ ᴜꜱᴇʀ.\nᴜꜱᴀɢᴇ: /resetwarns <user>",[m
+[31m-            "warns":      "ᴠɪᴇᴡ ᴀ ᴜꜱᴇʀ'ꜱ ᴡᴀʀɴɪɴɢꜱ.\nᴜꜱᴀɢᴇ: /warns <user>",[m
+[31m-            "warnlimit":  "ꜱᴇᴛ ᴡᴀʀɴ ʟɪᴍɪᴛ (ᴅᴇꜰᴀᴜʟᴛ 3).\nᴜꜱᴀɢᴇ: /warnlimit <n>",[m
+[31m-            "warnmode":   "ꜱᴇᴛ ᴀᴄᴛɪᴏɴ ᴏɴ ʟɪᴍɪᴛ: ʙᴀɴ/ᴋɪᴄᴋ/ᴍᴜᴛᴇ.\nᴜꜱᴀɢᴇ: /warnmode <action>",[m
+[32m+[m[32m            "antiraid":       "Toggle anti-raid mode.\nUsage: /antiraid on|off",[m
+[32m+[m[32m            "raidtime":       "Set raid mode duration.\nUsage: /raidtime <time>",[m
+[32m+[m[32m            "raidactionmode": "Set raid action: ban/kick/mute.\nUsage: /raidactionmode <action>",[m
+         },[m
+     },[m
+[31m-    "ADMIN": {[m
+[31m-        "emoji": "🛡",[m
+[32m+[m[32m    "APPROVAL": {[m
+[32m+[m[32m        "label": "Approval",[m
+[32m+[m[32m        "desc": "Approve users to bypass locks, blocklist, and antiflood.",[m
+         "cmds": {[m
+[31m-            "promote":   "ᴘʀᴏᴍᴏᴛᴇ ᴀ ᴜꜱᴇʀ ᴛᴏ ᴀᴅᴍɪɴ.\nᴜꜱᴀɢᴇ: /promote <user> [title]",[m
+[31m-            "demote":    "ᴅᴇᴍᴏᴛᴇ ᴀɴ ᴀᴅᴍɪɴ.\nᴜꜱᴀɢᴇ: /demote <user>",[m
+[31m-            "title":     "ꜱᴇᴛ ᴄᴜꜱᴛᴏᴍ ᴀᴅᴍɪɴ ᴛɪᴛʟᴇ (16 ᴄʜᴀʀ ᴍᴀx).\nᴜꜱᴀɢᴇ: /title <user> <title>",[m
+[31m-            "adminlist": "ʟɪꜱᴛ ᴀʟʟ ᴀᴅᴍɪɴꜱ ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ.",[m
+[31m-            "invitelink": "ɢᴇᴛ ᴛʜᴇ ɢʀᴏᴜᴘ ɪɴᴠɪᴛᴇ ʟɪɴᴋ.",[m
+[31m-            "setgtitle": "ᴄʜᴀɴɢᴇ ɢʀᴏᴜᴘ ᴛɪᴛʟᴇ.\nᴜꜱᴀɢᴇ: /setgtitle <text>",[m
+[31m-            "setgdesc":  "ᴄʜᴀɴɢᴇ ɢʀᴏᴜᴘ ᴅᴇꜱᴄʀɪᴘᴛɪᴏɴ.\nᴜꜱᴀɢᴇ: /setgdesc <text>",[m
+[32m+[m[32m            "approve":   "Approve a user.\nUsage: /approve <user>",[m
+[32m+[m[32m            "unapprove": "Remove approval.\nUsage: /unapprove <user>",[m
+[32m+[m[32m            "approved":  "List all approved users.",[m
+         },[m
+     },[m
+[31m-    "PINS": {[m
+[31m-        "emoji": "📌",[m
+[32m+[m[32m    "BANS": {[m
+[32m+[m[32m        "label": "Bans",[m
+[32m+[m[32m        "desc": "Ban and unban users from your group.",[m
+         "cmds": {[m
+[31m-            "pin":      "ᴘɪɴ ᴛʜᴇ ʀᴇᴘʟɪᴇᴅ ᴍᴇꜱꜱᴀɢᴇ.\nᴜꜱᴀɢᴇ: reply /pin [loud]",[m
+[31m-            "unpin":    "ᴜɴᴘɪɴ ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ᴘɪɴɴᴇᴅ ᴍꜱɢ.",[m
+[31m-            "unpinall": "ᴜɴᴘɪɴ ᴀʟʟ ᴘɪɴɴᴇᴅ ᴍᴇꜱꜱᴀɢᴇꜱ.",[m
+[31m-            "pinned":   "ꜱʜᴏᴡ ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ᴘɪɴɴᴇᴅ ᴍꜱɢ ʟɪɴᴋ.",[m
+[32m+[m[32m            "ban":    "Ban a user permanently.\nUsage: /ban <user> [reason]",[m
+[32m+[m[32m            "tban":   "Temp ban for a duration.\nUsage: /tban <user> <time> [reason]",[m
+[32m+[m[32m            "unban":  "Unban a previously banned user.\nUsage: /unban <user>",[m
+[32m+[m[32m            "sban":   "Silent ban — deletes the command msg too.\nUsage: /sban <user>",[m
+[32m+[m[32m            "kick":   "Kick a user (they can rejoin).\nUsage: /kick <user> [reason]",[m
+[32m+[m[32m            "kickme": "Kick yourself from the group.",[m
+         },[m
+     },[m
+[31m-    "PURGE": {[m
+[31m-        "emoji": "🗑",[m
+[32m+[m[32m    "BLOCKLISTS": {[m
+[32m+[m[32m        "label": "Blocklists",[m
+[32m+[m[32m        "desc": "Manage word blocklists to auto-moderate messages.",[m
+         "cmds": {[m
+[31m-            "purge": "ᴅᴇʟᴇᴛᴇ ᴍꜱɢꜱ ꜰʀᴏᴍ ʀᴇᴘʟʏ ᴛᴏ ɴᴏᴡ.\nᴜꜱᴀɢᴇ: reply /purge   ᴏʀ   /purge <n>",[m
+[31m-            "del":   "ᴅᴇʟᴇᴛᴇ ᴛʜᴇ ʀᴇᴘʟɪᴇᴅ ᴍᴇꜱꜱᴀɢᴇ.\nᴜꜱᴀɢᴇ: reply /del",[m
+[32m+[m[32m            "addblocklist":    "Add a trigger to blocklist.\nUsage: /addblocklist <trigger>",[m
+[32m+[m[32m            "rmblocklist":     "Remove a trigger.\nUsage: /rmblocklist <trigger>",[m
+[32m+[m[32m            "blocklist":       "Show all blocklisted words.",[m
+[32m+[m[32m            "setblocklistmode": "Set action: ban/kick/mute/warn/delete.\nUsage: /setblocklistmode <mode>",[m
+         },[m
+     },[m
+[31m-    "REPORTS": {[m
+[31m-        "emoji": "📣",[m
+[32m+[m[32m    "CAPTCHA": {[m
+[32m+[m[32m        "label": "CAPTCHA",[m
+[32m+[m[32m        "desc": "Verify new members with CAPTCHA.",[m
+         "cmds": {[m
+[31m-            "report":  "ʀᴇᴘᴏʀᴛ ᴀ ᴜꜱᴇʀ ᴛᴏ ᴀᴅᴍɪɴꜱ.\nᴜꜱᴀɢᴇ: reply /report  ᴏʀ  @admin",[m
+[31m-            "reports": "ᴛᴏɢɢʟᴇ ʀᴇᴘᴏʀᴛ ɴᴏᴛɪꜰɪᴄᴀᴛɪᴏɴꜱ.\nᴜꜱᴀɢᴇ: /reports on|off",[m
+[32m+[m[32m            "captcha":     "Toggle CAPTCHA for new members.\nUsage: /captcha on|off",[m
+[32m+[m[32m            "captchamode": "Set CAPTCHA type: button/math.\nUsage: /captchamode <type>",[m
+[32m+[m[32m            "captchatime": "Set time to solve before kick.\nUsage: /captchatime <time>",[m
+         },[m
+     },[m
+[31m-    "WELCOME": {[m
+[31m-        "emoji": "👋",[m
+[32m+[m[32m    "CLEANCMDS": {[m
+[32m+[m[32m        "label": "Clean Cmds",[m
+[32m+[m[32m        "desc": "Auto-delete bot commands and service messages.",[m
+[32m+[m[32m        "cmds": {[m
+[32m+[m[32m            "cleancmds":    "Auto-delete command messages.\nUsage: /cleancmds on|off",[m
+[32m+[m[32m            "cleanservice": "Auto-delete service messages.\nUsage: /cleanservice on|off",[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "CONNECTIONS": {[m
+[32m+[m[32m        "label": "Connections",[m
+[32m+[m[32m        "desc": "Connect to a group from PM to manage settings.",[m
+[32m+[m[32m        "cmds": {[m
+[32m+[m[32m            "connect":    "Connect to a group from PM.\nUsage: /connect <chat_id>",[m
+[32m+[m[32m            "disconnect": "Disconnect from the connected group.",[m
+[32m+[m[32m            "connection": "Show your current connection.",[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "DISABLE": {[m
+[32m+[m[32m        "label": "Disabling",[m
+[32m+[m[32m        "desc": "Disable specific commands in your group.",[m
+[32m+[m[32m        "cmds": {[m
+[32m+[m[32m            "disable":     "Disable a command.\nUsage: /disable <cmd>",[m
+[32m+[m[32m            "enable":      "Re-enable a disabled command.\nUsage: /enable <cmd>",[m
+[32m+[m[32m            "disabled":    "List all disabled commands.",[m
+[32m+[m[32m            "disableable": "List all disable-capable commands.",[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "FEDERATION": {[m
+[32m+[m[32m        "label": "Federations",[m
+[32m+[m[32m        "desc": "Link groups together and share bans.",[m
+         "cmds": {[m
+[31m-            "setwelcome":   "ꜱᴇᴛ ᴄᴜꜱᴛᴏᴍ ᴡᴇʟᴄᴏᴍᴇ ᴍꜱɢ.\nᴛᴇᴍᴘʟᴀᴛᴇꜱ: {first}, {chatname}, {count}\nʙᴜᴛᴛᴏɴꜱ: [ʟᴀʙᴇʟ](url)",[m
+[31m-            "welcome":      "ᴛᴏɢɢʟᴇ ᴡᴇʟᴄᴏᴍᴇ ᴏɴ/ᴏꜰꜰ.\nᴜꜱᴀɢᴇ: /welcome on|off",[m
+[31m-            "resetwelcome": "ʀᴇꜱᴛᴏʀᴇ ᴅᴇꜰᴀᴜʟᴛ ᴡᴇʟᴄᴏᴍᴇ ᴍꜱɢ.",[m
+[31m-            "setgoodbye":   "ꜱᴇᴛ ɢᴏᴏᴅʙʏᴇ ᴍᴇꜱꜱᴀɢᴇ.\nᴜꜱᴀɢᴇ: /setgoodbye <text>",[m
+[31m-            "cleanwelcome": "ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇ ᴏʟᴅ ᴡᴇʟᴄᴏᴍᴇꜱ.\nᴜꜱᴀɢᴇ: /cleanwelcome on|off",[m
+[32m+[m[32m            "newfed":      "Create a new federation.\nUsage: /newfed <name>",[m
+[32m+[m[32m            "joinfed":     "Join a federation.\nUsage: /joinfed <fed_id>",[m
+[32m+[m[32m            "leavefed":    "Leave the current federation.",[m
+[32m+[m[32m            "fedban":      "Fed-ban across all linked chats.\nUsage: /fedban <user> [reason]",[m
+[32m+[m[32m            "unfedban":    "Remove a fed ban.\nUsage: /unfedban <user>",[m
+[32m+[m[32m            "fedinfo":     "Show federation info.\nUsage: /fedinfo [fed_id]",[m
+[32m+[m[32m            "fedadmins":   "List federation admins.",[m
+[32m+[m[32m            "addfedadmin": "Add a fed admin.\nUsage: /addfedadmin <user>",[m
+[32m+[m[32m            "rmfedadmin":  "Remove a fed admin.\nUsage: /rmfedadmin <user>",[m
+         },[m
+     },[m
+     "FILTERS": {[m
+[31m-        "emoji": "🔍",[m
+[32m+[m[32m        "label": "Filters",[m
+[32m+[m[32m        "desc": "Set auto-reply triggers for keywords.",[m
+         "cmds": {[m
+[31m-            "filter":  "ᴀᴅᴅ ᴀɴ ᴀᴜᴛᴏ-ʀᴇᴘʟʏ ꜰɪʟᴛᴇʀ.\nᴜꜱᴀɢᴇ: /filter <keyword> <reply>\nꜱᴜᴘᴘᴏʀᴛꜱ ʙᴜᴛᴛᴏɴ ꜱʏɴᴛᴀx: [ʟᴀʙᴇʟ](url)",[m
+[31m-            "stop":    "ʀᴇᴍᴏᴠᴇ ᴀ ꜰɪʟᴛᴇʀ.\nᴜꜱᴀɢᴇ: /stop <keyword>",[m
+[31m-            "filters": "ʟɪꜱᴛ ᴀʟʟ ᴀᴄᴛɪᴠᴇ ꜰɪʟᴛᴇʀꜱ ɪɴ ᴛʜɪꜱ ᴄʜᴀᴛ.",[m
+[32m+[m[32m            "filter":  "Set a filter.\nUsage: /filter <keyword> <reply>",[m
+[32m+[m[32m            "stop":    "Remove a filter.\nUsage: /stop <keyword>",[m
+[32m+[m[32m            "filters": "List all active filters.",[m
+         },[m
+     },[m
+[31m-    "NOTES": {[m
+[31m-        "emoji": "📝",[m
+[32m+[m[32m    "FORMATTING": {[m
+[32m+[m[32m        "label": "Formatting",[m
+[32m+[m[32m        "desc": "Learn how to format text in Telegram.",[m
+[32m+[m[32m        "cmds": {[m
+[32m+[m[32m            "markdownhelp": "Show markdown formatting guide.",[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "GREETINGS": {[m
+[32m+[m[32m        "label": "Greetings",[m
+[32m+[m[32m        "desc": "Welcome and goodbye messages for your group.",[m
+         "cmds": {[m
+[31m-            "save":     "ꜱᴀᴠᴇ ᴀ ɴᴏᴛᴇ.\nᴜꜱᴀɢᴇ: /save <name> <content>",[m
+[31m-            "get":      "ʀᴇᴛʀɪᴇᴠᴇ ᴀ ɴᴏᴛᴇ.\nᴜꜱᴀɢᴇ: /get <name>  ᴏʀ  #name",[m
+[31m-            "clear":    "ᴅᴇʟᴇᴛᴇ ᴀ ɴᴏᴛᴇ.\nᴜꜱᴀɢᴇ: /clear <name>",[m
+[31m-            "notes":    "ʟɪꜱᴛ ᴀʟʟ ꜱᴀᴠᴇᴅ ɴᴏᴛᴇꜱ ɪɴ ᴛʜɪꜱ ᴄʜᴀᴛ.",[m
+[31m-            "clearall": "ᴅᴇʟᴇᴛᴇ ᴀʟʟ ɴᴏᴛᴇꜱ (ᴀᴅᴍɪɴ ᴏɴʟʏ).",[m
+[32m+[m[32m            "setwelcome":    "Set welcome message.\nUsage: /setwelcome <text>",[m
+[32m+[m[32m            "welcome":       "Toggle welcome messages.\nUsage: /welcome on|off",[m
+[32m+[m[32m            "setgoodbye":    "Set goodbye message.\nUsage: /setgoodbye <text>",[m
+[32m+[m[32m            "goodbye":       "Toggle goodbye messages.\nUsage: /goodbye on|off",[m
+[32m+[m[32m            "cleanwelcome":  "Delete old welcome messages.\nUsage: /cleanwelcome on|off",[m
+[32m+[m[32m            "resetwelcome":  "Reset welcome to default.",[m
+[32m+[m[32m            "resetgoodbye":  "Reset goodbye to default.",[m
+         },[m
+     },[m
+     "LOCKS": {[m
+[31m-        "emoji": "🔒",[m
+[32m+[m[32m        "label": "Locks",[m
+[32m+[m[32m        "desc": "Lock specific message types in your group.",[m
+         "cmds": {[m
+[31m-            "lock":   "ʟᴏᴄᴋ ᴀ ᴍᴇꜱꜱᴀɢᴇ ᴛʏᴘᴇ.\nᴜꜱᴀɢᴇ: /lock <type>\nᴛʏᴘᴇꜱ: text, media, sticker, gif, url, bot, forward, photo, video, voice, audio, document, poll, contact, location...",[m
+[31m-            "unlock": "ᴜɴʟᴏᴄᴋ ᴀ ᴍᴇꜱꜱᴀɢᴇ ᴛʏᴘᴇ.\nᴜꜱᴀɢᴇ: /unlock <type>",[m
+[31m-            "locks":  "ꜱʜᴏᴡ ᴄᴜʀʀᴇɴᴛ ʟᴏᴄᴋ ꜱᴛᴀᴛᴜꜱ ꜰᴏʀ ᴛʜɪꜱ ᴄʜᴀᴛ.",[m
+[32m+[m[32m            "lock":   "Lock a permission.\nUsage: /lock <type>\nTypes: sticker, gif, url, photo, video, voice, document, forward, game, poll",[m
+[32m+[m[32m            "unlock": "Unlock a permission.\nUsage: /unlock <type>",[m
+[32m+[m[32m            "locks":  "Show current lock status.",[m
+         },[m
+     },[m
+[31m-    "BLOCKLIST": {[m
+[31m-        "emoji": "🚷",[m
+[32m+[m[32m    "LOGCHANNEL": {[m
+[32m+[m[32m        "label": "Log Channels",[m
+[32m+[m[32m        "desc": "Log admin actions to a dedicated channel.",[m
+         "cmds": {[m
+[31m-            "addblocklist":    "ᴀᴅᴅ ᴀ ᴡᴏʀᴅ ᴛᴏ ʙʟᴏᴄᴋʟɪꜱᴛ.\nᴜꜱᴀɢᴇ: /addblocklist <word>",[m
+[31m-            "rmblocklist":     "ʀᴇᴍᴏᴠᴇ ᴀ ᴡᴏʀᴅ.\nᴜꜱᴀɢᴇ: /rmblocklist <word>",[m
+[31m-            "blocklist":       "ᴠɪᴇᴡ ᴀʟʟ ʙʟᴏᴄᴋᴇᴅ ᴡᴏʀᴅꜱ.",[m
+[31m-            "setblocklistmode": "ꜱᴇᴛ ᴀᴄᴛɪᴏɴ: ᴅᴇʟᴇᴛᴇ/ᴡᴀʀɴ/ᴍᴜᴛᴇ/ᴋɪᴄᴋ/ʙᴀɴ.\nᴜꜱᴀɢᴇ: /setblocklistmode <action>",[m
+[32m+[m[32m            "logchannel": "Get current log channel.",[m
+[32m+[m[32m            "setlog":     "Set a log channel.\nUsage: Run in the target channel",[m
+[32m+[m[32m            "unsetlog":   "Remove the log channel.",[m
+         },[m
+     },[m
+[31m-    "ANTIFLOOD": {[m
+[31m-        "emoji": "🌊",[m
+[32m+[m[32m    "MISC": {[m
+[32m+[m[32m        "label": "Misc",[m
+[32m+[m[32m        "desc": "Miscellaneous utility commands.",[m
+[32m+[m[32m        "cmds": {[m
+[32m+[m[32m            "id":    "Get user/chat ID.",[m
+[32m+[m[32m            "info":  "Get user information card.",[m
+[32m+[m[32m            "ping":  "Check bot latency.",[m
+[32m+[m[32m            "about": "About this bot.",[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "NOTES": {[m
+[32m+[m[32m        "label": "Notes",[m
+[32m+[m[32m        "desc": "Save and retrieve notes with #hashtags.",[m
+[32m+[m[32m        "cmds": {[m
+[32m+[m[32m            "save":     "Save a note.\nUsage: /save <name> <text>",[m
+[32m+[m[32m            "get":      "Get a saved note.\nUsage: /get <name> or #name",[m
+[32m+[m[32m            "clear":    "Delete a note.\nUsage: /clear <name>",[m
+[32m+[m[32m            "notes":    "List all saved notes.",[m
+[32m+[m[32m            "clearall": "Delete ALL notes in this chat.",[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "PIN": {[m
+[32m+[m[32m        "label": "Pin",[m
+[32m+[m[32m        "desc": "Pin and manage pinned messages.",[m
+[32m+[m[32m        "cmds": {[m
+[32m+[m[32m            "pin":      "Pin the replied message.\nUsage: reply /pin [loud]",[m
+[32m+[m[32m            "unpin":    "Unpin the current pinned message.",[m
+[32m+[m[32m            "unpinall": "Unpin all pinned messages.",[m
+[32m+[m[32m            "pinned":   "Show the current pinned message link.",[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "PRIVACY": {[m
+[32m+[m[32m        "label": "Privacy",[m
+[32m+[m[32m        "desc": "Manage user data and privacy settings.",[m
+         "cmds": {[m
+[31m-            "setflood":     "ꜱᴇᴛ ꜰʟᴏᴏᴅ ʟɪᴍɪᴛ (0 = ᴅɪꜱᴀʙʟᴇᴅ).\nᴜꜱᴀɢᴇ: /setflood <n>",[m
+[31m-            "setfloodmode": "ꜱᴇᴛ ᴀᴄᴛɪᴏɴ: ʙᴀɴ/ᴋɪᴄᴋ/ᴍᴜᴛᴇ/ᴛʙᴀɴ/ᴛᴍᴜᴛᴇ.\nᴜꜱᴀɢᴇ: /setfloodmode <action>",[m
+[31m-            "flood":        "ꜱʜᴏᴡ ᴄᴜʀʀᴇɴᴛ ᴀɴᴛɪ-ꜰʟᴏᴏᴅ ꜱᴇᴛᴛɪɴɢꜱ.",[m
+[32m+[m[32m            "privacy":   "View your stored data.",[m
+[32m+[m[32m            "deletedata": "Request deletion of your data.",[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "PURGES": {[m
+[32m+[m[32m        "label": "Purges",[m
+[32m+[m[32m        "desc": "Bulk delete messages.",[m
+[32m+[m[32m        "cmds": {[m
+[32m+[m[32m            "purge": "Delete messages from replied to current.\nUsage: reply /purge or /purge <n>",[m
+[32m+[m[32m            "del":   "Delete the replied message.",[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "REPORTS": {[m
+[32m+[m[32m        "label": "Reports",[m
+[32m+[m[32m        "desc": "Allow users to report rule violations.",[m
+[32m+[m[32m        "cmds": {[m
+[32m+[m[32m            "report":  "Report a message to admins.\nUsage: reply /report",[m
+[32m+[m[32m            "reports": "Toggle reports.\nUsage: /reports on|off",[m
+         },[m
+     },[m
+     "RULES": {[m
+[31m-        "emoji": "📋",[m
+[32m+[m[32m        "label": "Rules",[m
+[32m+[m[32m        "desc": "Set and view group rules.",[m
+         "cmds": {[m
+[31m-            "setrules":     "ꜱᴇᴛ ɢʀᴏᴜᴘ ʀᴜʟᴇꜱ.\nᴜꜱᴀɢᴇ: /setrules <text>",[m
+[31m-            "rules":        "ꜱʜᴏᴡ ɢʀᴏᴜᴘ ʀᴜʟᴇꜱ.",[m
+[31m-            "clearrules":   "ᴅᴇʟᴇᴛᴇ ᴛʜᴇ ɢʀᴏᴜᴘ ʀᴜʟᴇꜱ.",[m
+[31m-            "privaterules": "ꜱᴇɴᴅ ʀᴜʟᴇꜱ ᴠɪᴀ ᴘᴍ ɪɴꜱᴛᴇᴀᴅ.\nᴜꜱᴀɢᴇ: /privaterules on|off",[m
+[32m+[m[32m            "setrules":     "Set group rules.\nUsage: /setrules <text>",[m
+[32m+[m[32m            "rules":        "Show group rules.",[m
+[32m+[m[32m            "clearrules":   "Delete the group rules.",[m
+[32m+[m[32m            "privaterules": "Send rules via PM.\nUsage: /privaterules on|off",[m
+         },[m
+     },[m
+[31m-    "FEDERATION": {[m
+[31m-        "emoji": "🌐",[m
+[32m+[m[32m    "TOPICS": {[m
+[32m+[m[32m        "label": "Topics",[m
+[32m+[m[32m        "desc": "Manage forum topics in supergroups.",[m
+         "cmds": {[m
+[31m-            "newfed":      "ᴄʀᴇᴀᴛᴇ ᴀ ɴᴇᴡ ꜰᴇᴅᴇʀᴀᴛɪᴏɴ.\nᴜꜱᴀɢᴇ: /newfed <name>",[m
+[31m-            "joinfed":     "ᴊᴏɪɴ ᴀ ꜰᴇᴅ (ɢʀᴏᴜᴘ ᴀᴅᴍɪɴ).\nᴜꜱᴀɢᴇ: /joinfed <fed_id>",[m
+[31m-            "leavefed":    "ʟᴇᴀᴠᴇ ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ꜰᴇᴅ.",[m
+[31m-            "fedban":      "ꜰᴇᴅ-ʙᴀɴ ᴀᴄʀᴏꜱꜱ ᴀʟʟ ʟɪɴᴋᴇᴅ ᴄʜᴀᴛꜱ.\nᴜꜱᴀɢᴇ: /fedban <user> [reason]",[m
+[31m-            "unfedban":    "ʀᴇᴍᴏᴠᴇ ᴀ ꜰᴇᴅ ʙᴀɴ.\nᴜꜱᴀɢᴇ: /unfedban <user>",[m
+[31m-            "fedinfo":     "ꜱʜᴏᴡ ꜰᴇᴅ ɪɴꜰᴏ.\nᴜꜱᴀɢᴇ: /fedinfo [fed_id]",[m
+[31m-            "fedadmins":   "ʟɪꜱᴛ ꜰᴇᴅ ᴀᴅᴍɪɴꜱ.",[m
+[31m-            "addfedadmin": "ᴀᴅᴅ ᴀ ꜰᴇᴅ ᴀᴅᴍɪɴ.\nᴜꜱᴀɢᴇ: /addfedadmin <user>",[m
+[31m-            "rmfedadmin":  "ʀᴇᴍᴏᴠᴇ ᴀ ꜰᴇᴅ ᴀᴅᴍɪɴ.\nᴜꜱᴀɢᴇ: /rmfedadmin <user>",[m
+[32m+[m[32m            "newtopic":   "Create a new topic.\nUsage: /newtopic <name>",[m
+[32m+[m[32m            "closetopic": "Close the current topic.",[m
+[32m+[m[32m            "opentopic":  "Reopen a closed topic.",[m
+         },[m
+     },[m
+[31m-    "DISABLE": {[m
+[31m-        "emoji": "🔕",[m
+[32m+[m[32m    "WARNINGS": {[m
+[32m+[m[32m        "label": "Warnings",[m
+[32m+[m[32m        "desc": "Issue and manage warnings.",[m
+         "cmds": {[m
+[31m-            "disable":     "ᴅɪꜱᴀʙʟᴇ ᴀ ᴄᴏᴍᴍᴀɴᴅ ɪɴ ᴛʜɪꜱ ᴄʜᴀᴛ.\nᴜꜱᴀɢᴇ: /disable <cmd>",[m
+[31m-            "enable":      "ʀᴇ-ᴇɴᴀʙʟᴇ ᴀ ᴅɪꜱᴀʙʟᴇᴅ ᴄᴏᴍᴍᴀɴᴅ.\nᴜꜱᴀɢᴇ: /enable <cmd>",[m
+[31m-            "disabled":    "ʟɪꜱᴛ ᴀʟʟ ᴅɪꜱᴀʙʟᴇᴅ ᴄᴏᴍᴍᴀɴᴅꜱ.",[m
+[31m-            "disableable": "ʟɪꜱᴛ ᴀʟʟ ᴅɪꜱᴀʙʟᴇ-ᴄᴀᴘᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅꜱ.",[m
+[32m+[m[32m            "warn":       "Issue a warning.\nUsage: /warn <user> [reason]",[m
+[32m+[m[32m            "dwarn":      "Warn + delete the replied msg.\nUsage: reply /dwarn",[m
+[32m+[m[32m            "unwarn":     "Remove last warning.\nUsage: /unwarn <user>",[m
+[32m+[m[32m            "resetwarns": "Clear all warns for a user.\nUsage: /resetwarns <user>",[m
+[32m+[m[32m            "warns":      "View a user's warnings.\nUsage: /warns <user>",[m
+[32m+[m[32m            "warnlimit":  "Set warn limit (default 3).\nUsage: /warnlimit <n>",[m
+[32m+[m[32m            "warnmode":   "Set action on limit: ban/kick/mute.\nUsage: /warnmode <action>",[m
+         },[m
+     },[m
+     "STATS": {[m
+[31m-        "emoji": "📊",[m
+[32m+[m[32m        "label": "Stats",[m
+[32m+[m[32m        "desc": "Bot statistics and broadcasting (owner only).",[m
+         "cmds": {[m
+[31m-            "stats":     "ꜱʜᴏᴡ ʙᴏᴛ ꜱᴛᴀᴛɪꜱᴛɪᴄꜱ.\nᴏᴡɴᴇʀ/ꜱᴜᴅᴏ ᴏɴʟʏ.",[m
+[31m-            "broadcast": "ꜱᴇɴᴅ ᴀ ᴍꜱɢ ᴛᴏ ᴀʟʟ ɢʀᴏᴜᴘꜱ.\nᴏᴡɴᴇʀ ᴏɴʟʏ.\nᴜꜱᴀɢᴇ: /broadcast <message>",[m
+[32m+[m[32m            "stats":     "Show bot statistics.\nOwner/sudo only.",[m
+[32m+[m[32m            "broadcast": "Broadcast to all chats.\nOwner only.",[m
+         },[m
+     },[m
+     "MAINTENANCE": {[m
+[31m-        "emoji": "🔧",[m
+[32m+[m[32m        "label": "Maintenance",[m
+[32m+[m[32m        "desc": "Owner-only kill switch for the bot.",[m
+         "cmds": {[m
+[31m-            "maintenance": "ᴛᴏɢɢʟᴇ ᴍᴀɪɴᴛᴇɴᴀɴᴄᴇ ᴍᴏᴅᴇ.\nʙʀᴏᴀᴅᴄᴀꜱᴛꜱ ᴛᴏ ᴀʟʟ ᴄʜᴀᴛꜱ + ᴅᴍꜱ.\nᴏᴡɴᴇʀ ᴏɴʟʏ.\nᴜꜱᴀɢᴇ: /maintenance on|off|status",[m
+[32m+[m[32m            "maintenance": "Toggle maintenance mode.\nUsage: /maintenance on|off|status",[m
+         },[m
+     },[m
+ }[m
+ [m
+[31m-# reverse map: command → module key[m
+[31m-_CMD_TO_MOD = {}[m
+[31m-for mod_key, mod_data in MODULES.items():[m
+[31m-    for cmd in mod_data["cmds"]:[m
+[31m-        _CMD_TO_MOD[cmd] = mod_key[m
+[32m+[m[32m# reverse lookup: cmd → module key[m
+[32m+[m[32m_CMD_TO_MOD: dict[str, str] = {}[m
+[32m+[m[32mfor _k, _v in MODULES.items():[m
+[32m+[m[32m    for _c in _v["cmds"]:[m
+[32m+[m[32m        _CMD_TO_MOD[_c] = _k[m
+ [m
+ [m
+ # ══════════════════════════════════════════════════════════════════════════════[m
+[31m-# LEVEL 1 — Main help menu (all modules as direct buttons, 3 columns)[m
+[32m+[m[32m# LEVEL 1 — Main help menu (27 modules, 3 columns, clean text)[m
+ # ══════════════════════════════════════════════════════════════════════════════[m
+ [m
+ def main_menu_keyboard() -> InlineKeyboardMarkup:[m
+[31m-    """All modules shown directly — no category layer."""[m
+     btns = [[m
+[31m-        Btn(f"{data['emoji']} {sc(key.lower())}", callback_data=f"help:{key}")[m
+[32m+[m[32m        Btn(data["label"], callback_data=f"help:{key}")[m
+         for key, data in MODULES.items()[m
+     ][m
+     rows = build_menu(btns, n_cols=3, footer=[_back("start:main"), _close()])[m
+[36m@@ -251,17 +335,16 @@[m [mdef main_menu_keyboard() -> InlineKeyboardMarkup:[m
+ [m
+ [m
+ # ══════════════════════════════════════════════════════════════════════════════[m
+[31m-# LEVEL 2 — Module sub-menu (each command is a button)[m
+[32m+[m[32m# LEVEL 2 — Module sub-menu (commands as buttons)[m
+ # ══════════════════════════════════════════════════════════════════════════════[m
+ [m
+ def module_help_keyboard(module_name: str) -> InlineKeyboardMarkup:[m
+[31m-    """Show each command as a clickable sub-button."""[m
+     mod = MODULES.get(module_name)[m
+     if not mod:[m
+         return InlineKeyboardMarkup([[_back("help:main")]])[m
+ [m
+     btns = [[m
+[31m-        Btn(f"{sc(cmd)}", callback_data=f"cmd:{module_name}:{cmd}")[m
+[32m+[m[32m        Btn(cmd, callback_data=f"cmd:{module_name}:{cmd}")[m
+         for cmd in mod["cmds"][m
+     ][m
+     rows = build_menu(btns, n_cols=3, footer=[_back("help:main"), _close()])[m
+[36m@@ -269,20 +352,18 @@[m [mdef module_help_keyboard(module_name: str) -> InlineKeyboardMarkup:[m
+ [m
+ [m
+ # ══════════════════════════════════════════════════════════════════════════════[m
+[31m-# LEVEL 3 — Command detail (text shown above, keyboard below)[m
+[32m+[m[32m# LEVEL 3 — Command detail[m
+ # ══════════════════════════════════════════════════════════════════════════════[m
+ [m
+ def command_detail_keyboard(module_name: str) -> InlineKeyboardMarkup:[m
+[31m-    """Back to module sub-menu + back to main + close."""[m
+     return InlineKeyboardMarkup([[m
+         [_back(f"help:{module_name}"),[m
+[31m-         Btn(f"🏠 {sc('menu')}", callback_data="help:main"),[m
+[32m+[m[32m         Btn("Menu", callback_data="help:main"),[m
+          _close()],[m
+     ])[m
+ [m
+ [m
+ def get_command_detail(module_name: str, cmd: str) -> str | None:[m
+[31m-    """Return the detail text for a specific command."""[m
+     mod = MODULES.get(module_name)[m
+     if not mod:[m
+         return None[m
+[36m@@ -290,19 +371,15 @@[m [mdef get_command_detail(module_name: str, cmd: str) -> str | None:[m
+ [m
+ [m
+ def get_module_header(module_name: str) -> str:[m
+[31m-    """Return formatted header for a module."""[m
+     mod = MODULES.get(module_name)[m
+     if not mod:[m
+[31m-        return f"❓ {sc('unknown module')}"[m
+[31m-    emoji = mod["emoji"][m
+[32m+[m[32m        return "Unknown module."[m
+[32m+[m[32m    label = mod["label"][m
+[32m+[m[32m    desc = mod["desc"][m
+     cmds = mod["cmds"][m
+[31m-    lines = [f"{emoji} <b>{sc(module_name.lower() + ' commands')}</b>\n"][m
+[31m-    for cmd, desc in cmds.items():[m
+[31m-        first_line = desc.split("\n")[0][m
+[31m-        lines.append(f"• <code>/{cmd}</code> — {first_line}")[m
+[32m+[m[32m    lines = [f"<b>{label}</b>\n{desc}\n"][m
+[32m+[m[32m    for cmd, detail in cmds.items():[m
+[32m+[m[32m        first_line = detail.split("\n")[0][m
+[32m+[m[32m        lines.append(f" • <code>/{cmd}</code> — {first_line}")[m
+[32m+[m[32m    lines.append(f"\n<i>Tap any command below for details.</i>")[m
+     return "\n".join(lines)[m
+[31m-[m
+[31m-[m
+[31m-# keep old name for compatibility[m
+[31m-def category_keyboard(category: str) -> InlineKeyboardMarkup:[m
+[31m-    return main_menu_keyboard()[m
+[1mdiff --git a/bot/modules/__init__.py b/bot/modules/__init__.py[m
+[1mindex d1a30b7..b3c6cbe 100644[m
+[1m--- a/bot/modules/__init__.py[m
+[1m+++ b/bot/modules/__init__.py[m
+[36m@@ -1,2 +1 @@[m
+[31m-# bot/modules/__init__.py[m
+[31m-# GuardianBot — modules sub-package marker.[m
+[32m+[m[32m# Rose[m
+[1mdiff --git a/bot/modules/start.py b/bot/modules/start.py[m
+[1mindex 307fedd..b34568c 100644[m
+[1m--- a/bot/modules/start.py[m
+[1m+++ b/bot/modules/start.py[m
+[36m@@ -1,6 +1,6 @@[m
+ """[m
+[31m-ᴏʟɪᴠɪᴀᴍᴀɴᴀɢᴇᴍᴇɴᴛʙᴏᴛ — /start, /help, /id, /ping[m
+[31m-3-level interactive help: Main → Module (sub-buttons) → Command detail[m
+[32m+[m[32mRose — /start, /help, /id, /ping, /about, /setcommands[m
+[32m+[m[32mClean Rose-style 3-level help navigation.[m
+ Crafted by 𝐒𝐄𝐂𝐑𝐄𝐓[m
+ """[m
+ from __future__ import annotations[m
+[36m@@ -8,22 +8,15 @@[m [mfrom __future__ import annotations[m
+ import html[m
+ import logging[m
+ import time[m
+[32m+[m[32mimport sys[m
+ [m
+[31m-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update[m
+[32m+[m[32mfrom telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, BotCommand[m
+ from telegram.constants import ParseMode[m
+ from telegram.ext import ([m
+     Application, CallbackQueryHandler, CommandHandler, ContextTypes,[m
+ )[m
+ [m
+ from bot.config import BOT_USERNAME, BOT_NAME, OWNER_ID[m
+[31m-[m
+[31m-[m
+[31m-def _uname(context) -> str:[m
+[31m-    """Get bot username — always correct from Telegram API."""[m
+[31m-    if context and context.bot and context.bot.username:[m
+[31m-        return context.bot.username[m
+[31m-    return BOT_USERNAME or "OliviaManagementBot"[m
+[31m-from bot.fonts import sc[m
+ from bot.helpers.buttons import ([m
+     main_menu_keyboard, module_help_keyboard, command_detail_keyboard,[m
+     get_command_detail, get_module_header, MODULES,[m
+[36m@@ -31,11 +24,28 @@[m [mfrom bot.helpers.buttons import ([m
+ [m
+ logger = logging.getLogger(__name__)[m
+ [m
+[32m+[m[32mSUPPORT_GROUP = "SecretzBotz"[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _uname(context) -> str:[m
+[32m+[m[32m    if context and context.bot and context.bot.username:[m
+[32m+[m[32m        return context.bot.username[m
+[32m+[m[32m    return BOT_USERNAME or "RoseManagementBot"[m
+[32m+[m
+ [m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+ # /start[m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+ [m
+[32m+[m[32mPM_START_TEXT = ([m
+[32m+[m[32m    "Hey there! My name is <b>Rose</b>.\n\n"[m
+[32m+[m[32m    "I'm a <b>group management bot</b> that helps you manage and protect "[m
+[32m+[m[32m    "your Telegram groups with powerful tools.\n\n"[m
+[32m+[m[32m    "Hit <b>Help</b> to find out more about how to use me to my full potential.\n\n"[m
+[32m+[m[32m    "<b>Crafted by</b> 𝐒𝐄𝐂𝐑𝐄𝐓"[m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m
+ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+     user = update.effective_user[m
+     chat = update.effective_chat[m
+[36m@@ -44,35 +54,28 @@[m [masync def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+ [m
+     if chat.type == "private":[m
+         if context.args and context.args[0] == "help":[m
+[31m-            return await _send_help_main(update)[m
+[32m+[m[32m            return await _send_help_main(update, context)[m
+ [m
+         uname = _uname(context)[m
+[31m-        text = ([m
+[31m-            f"👋 {sc('hello')} <b>{html.escape(user.first_name)}</b>!\n\n"[m
+[31m-            f"🛡️ {sc('i am')} <b>ᴏʟɪᴠɪᴀᴍᴀɴᴀɢᴇᴍᴇɴᴛʙᴏᴛ</b> — {sc('the most powerful telegram group management bot.')}\n\n"[m
+[31m-            f"⚡ {sc('features')}: {sc('bans, mutes, warns, filters, notes, welcome, locks, blocklist, anti-flood, federation, rules, reports, and more.')}\n\n"[m
+[31m-            f"📖 {sc('tap')} <b>❓ {sc('help')}</b> {sc('to explore all commands.')}\n\n"[m
+[31m-            f"🔥 {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"[m
+[31m-        )[m
+         kb = InlineKeyboardMarkup([[m
+             [[m
+[31m-                InlineKeyboardButton(f"📊 {sc('stats')}", callback_data="start:stats"),[m
+[31m-                InlineKeyboardButton(f"❓ {sc('help')}", callback_data="help:main"),[m
+[32m+[m[32m                InlineKeyboardButton("Help", callback_data="help:main"),[m
+[32m+[m[32m                InlineKeyboardButton("Support", url=f"https://t.me/{SUPPORT_GROUP}"),[m
+             ],[m
+             [[m
+[31m-                InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{uname}?startgroup=start"),[m
+[31m-                InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/OliviaBotz"),[m
+[32m+[m[32m                InlineKeyboardButton("Add to Group", url=f"https://t.me/{uname}?startgroup=start"),[m
+             ],[m
+         ])[m
+[31m-        await update.effective_message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)[m
+[31m-[m
+[32m+[m[32m        await update.effective_message.reply_text([m
+[32m+[m[32m            PM_START_TEXT, parse_mode=ParseMode.HTML, reply_markup=kb,[m
+[32m+[m[32m        )[m
+     else:[m
+         uname = _uname(context)[m
+         kb = InlineKeyboardMarkup([[[m
+[31m-            InlineKeyboardButton(f"📖 {sc('help')}", url=f"https://t.me/{uname}?start=help"),[m
+[32m+[m[32m            InlineKeyboardButton("Help", url=f"https://t.me/{uname}?start=help"),[m
+         ]])[m
+         await update.effective_message.reply_text([m
+[31m-            f"👋 {sc('hey')} <b>{html.escape(user.first_name)}</b>! {sc('pm me for help.')}",[m
+[32m+[m[32m            f"Hey <b>{html.escape(user.first_name)}</b>! PM me for help.",[m
+             parse_mode=ParseMode.HTML, reply_markup=kb,[m
+         )[m
+ [m
+[36m@@ -81,6 +84,20 @@[m [masync def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+ # /help[m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+ [m
+[32m+[m[32mHELP_HEADER = ([m
+[32m+[m[32m    "<b>Hey there! My name is Rose.</b>\n\n"[m
+[32m+[m[32m    "I have a bunch of useful features, such as flood control, a warning system, "[m
+[32m+[m[32m    "a note keeping system, and even predetermined replies on certain keywords.\n\n"[m
+[32m+[m[32m    "<b>Main commands:</b>\n"[m
+[32m+[m[32m    " • /help — this message\n"[m
+[32m+[m[32m    " • /start — check if I'm alive\n"[m
+[32m+[m[32m    " • /id — get user/chat ID\n"[m
+[32m+[m[32m    " • /ping — check latency\n\n"[m
+[32m+[m[32m    "<i>All commands can be used with / or !</i>\n\n"[m
+[32m+[m[32m    "<b>Tap any button below to learn more about each module.</b>"[m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m
+ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+     chat = update.effective_chat[m
+     if not chat:[m
+[36m@@ -88,71 +105,45 @@[m [masync def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+     if chat.type != "private":[m
+         uname = _uname(context)[m
+         kb = InlineKeyboardMarkup([[[m
+[31m-            InlineKeyboardButton(f"📖 {sc('open help in pm')}", url=f"https://t.me/{uname}?start=help"),[m
+[32m+[m[32m            InlineKeyboardButton("Open help in PM", url=f"https://t.me/{uname}?start=help"),[m
+         ]])[m
+         await update.effective_message.reply_text([m
+[31m-            f"📖 {sc('click below to view all commands in pm.')}",[m
+[32m+[m[32m            "Tap the button below to get help in PM.",[m
+             reply_markup=kb,[m
+         )[m
+         return[m
+[31m-    await _send_help_main(update)[m
+[32m+[m[32m    await _send_help_main(update, context)[m
+ [m
+ [m
+[31m-async def _send_help_main(update: Update) -> None:[m
+[31m-    text = ([m
+[31m-        f"<b>🛡️ ᴏʟɪᴠɪᴀᴍᴀɴᴀɢᴇᴍᴇɴᴛʙᴏᴛ — {sc('help menu')}</b>\n\n"[m
+[31m-        f"{sc('tap any module to see its commands')} 👇"[m
+[32m+[m[32masync def _send_help_main(update: Update, context=None):[m
+[32m+[m[32m    await update.effective_message.reply_text([m
+[32m+[m[32m        HELP_HEADER,[m
+[32m+[m[32m        parse_mode=ParseMode.HTML,[m
+[32m+[m[32m        reply_markup=main_menu_keyboard(),[m
+     )[m
+[31m-    kb = main_menu_keyboard()[m
+[31m-    msg = update.effective_message[m
+[31m-    if update.callback_query:[m
+[31m-        await update.callback_query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)[m
+[31m-    else:[m
+[31m-        await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)[m
+ [m
+ [m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+[31m-# CALLBACK ROUTER — handles all 3 levels[m
+[32m+[m[32m# Callback query router[m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+ [m
+[31m-async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+[31m-    """Single router for all help/start/cmd callbacks."""[m
+[32m+[m[32masync def _callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+     query = update.callback_query[m
+[31m-    await query.answer()[m
+[31m-    data = query.data or ""[m
+[31m-[m
+[31m-    # ── LEVEL 1: help:main → show all modules ────────────────────────────────[m
+[31m-    if data == "help:main":[m
+[31m-        await _send_help_main(update)[m
+[32m+[m[32m    if not query or not query.data:[m
+         return[m
+[32m+[m[32m    await query.answer()[m
+ [m
+[31m-    # ── LEVEL 2: help:MODULE → show module commands as sub-buttons ────────────[m
+[31m-    if data.startswith("help:") and not data.startswith("help:close"):[m
+[31m-        mod_key = data[5:]  # e.g. "BANS"[m
+[31m-        if mod_key in MODULES:[m
+[31m-            header = get_module_header(mod_key)[m
+[31m-            kb = module_help_keyboard(mod_key)[m
+[31m-            await query.edit_message_text(header, parse_mode=ParseMode.HTML, reply_markup=kb)[m
+[31m-            return[m
+[32m+[m[32m    data = query.data[m
+ [m
+[31m-    # ── LEVEL 3: cmd:MODULE:command → show command detail ────────────────────[m
+[31m-    if data.startswith("cmd:"):[m
+[31m-        parts = data.split(":", 2)  # cmd:BANS:ban[m
+[31m-        if len(parts) == 3:[m
+[31m-            mod_key, cmd = parts[1], parts[2][m
+[31m-            detail = get_command_detail(mod_key, cmd)[m
+[31m-            if detail:[m
+[31m-                mod = MODULES.get(mod_key, {})[m
+[31m-                emoji = mod.get("emoji", "📌")[m
+[31m-                text = ([m
+[31m-                    f"{emoji} <b>/{cmd}</b>\n\n"[m
+[31m-                    f"{detail}"[m
+[31m-                )[m
+[31m-                kb = command_detail_keyboard(mod_key)[m
+[31m-                await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)[m
+[31m-                return[m
+[32m+[m[32m    # ── help:close → delete the message ───────────────────────────────────[m
+[32m+[m[32m    if data == "help:close":[m
+[32m+[m[32m        try:[m
+[32m+[m[32m            await query.message.delete()[m
+[32m+[m[32m        except Exception:[m
+[32m+[m[32m            pass[m
+[32m+[m[32m        return[m
+ [m
+[31m-    # ── start:stats → quick stats card ───────────────────────────────────────[m
+[32m+[m[32m    # ── start:stats → quick stats ─────────────────────────────────────────[m
+     if data == "start:stats":[m
+         from bot.database.users_db import get_user_count[m
+         from bot.database.chats_db import get_chat_count[m
+[36m@@ -163,7 +154,7 @@[m [masync def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) ->[m
+             uc = cc = 0[m
+ [m
+         try:[m
+[31m-            import os, sys[m
+[32m+[m[32m            import os[m
+             from datetime import datetime, timezone[m
+             _start = getattr(sys.modules[__name__], '_BOT_START', None)[m
+             if not _start:[m
+[36m@@ -180,57 +171,81 @@[m [masync def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) ->[m
+             except Exception:[m
+                 mem_mb = "?"[m
+             extra = ([m
+[31m-                f"⏱️ {sc('uptime')}: <code>{uptime_str}</code>\n"[m
+[31m-                f"💾 {sc('memory')}: <code>{mem_mb} MB</code>\n"[m
+[31m-                f"🐍 {sc('python')}: <code>{sys.version.split()[0]}</code>\n"[m
+[32m+[m[32m                f"⏱ Uptime: <code>{uptime_str}</code>\n"[m
+[32m+[m[32m                f"💾 Memory: <code>{mem_mb} MB</code>\n"[m
+[32m+[m[32m                f"🐍 Python: <code>{sys.version.split()[0]}</code>\n"[m
+             )[m
+         except Exception:[m
+             extra = ""[m
+ [m
+         text = ([m
+[31m-            f"<b>📊 {sc('bot stats')}</b>\n\n"[m
+[31m-            f"👤 {sc('users')}: <code>{uc}</code>\n"[m
+[31m-            f"💬 {sc('groups')}: <code>{cc}</code>\n"[m
+[32m+[m[32m            f"<b>📊 Bot Stats</b>\n\n"[m
+[32m+[m[32m            f"👤 Users: <code>{uc}</code>\n"[m
+[32m+[m[32m            f"💬 Groups: <code>{cc}</code>\n"[m
+             f"{extra}\n"[m
+[31m-            f"🔥 {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"[m
+[32m+[m[32m            f"<b>Crafted by</b> 𝐒𝐄𝐂𝐑𝐄𝐓"[m
+         )[m
+         kb = InlineKeyboardMarkup([[[m
+[31m-            InlineKeyboardButton(f"🔙 {sc('back')}", callback_data="start:main"),[m
+[32m+[m[32m            InlineKeyboardButton("« Back", callback_data="start:main"),[m
+         ]])[m
+         await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)[m
+         return[m
+ [m
+[31m-    # ── start:main → back to /start screen ───────────────────────────────────[m
+[32m+[m[32m    # ── start:main → back to /start screen ────────────────────────────────[m
+     if data == "start:main":[m
+[31m-        user = update.effective_user[m
+[31m-        text = ([m
+[31m-            f"👋 {sc('hello')} <b>{html.escape(user.first_name)}</b>!\n\n"[m
+[31m-            f"🛡️ {sc('i am')} <b>ᴏʟɪᴠɪᴀᴍᴀɴᴀɢᴇᴍᴇɴᴛʙᴏᴛ</b> — {sc('the most powerful telegram group management bot.')}\n\n"[m
+[31m-            f"📖 {sc('tap')} <b>❓ {sc('help')}</b> {sc('to explore all commands.')}\n\n"[m
+[31m-            f"🔥 {sc('crafted by')} <b>𝐒𝐄𝐂𝐑𝐄𝐓</b>"[m
+[31m-        )[m
+[32m+[m[32m        uname = _uname(context)[m
+         kb = InlineKeyboardMarkup([[m
+             [[m
+[31m-                InlineKeyboardButton(f"📊 {sc('stats')}", callback_data="start:stats"),[m
+[31m-                InlineKeyboardButton(f"❓ {sc('help')}", callback_data="help:main"),[m
+[32m+[m[32m                InlineKeyboardButton("Help", callback_data="help:main"),[m
+[32m+[m[32m                InlineKeyboardButton("Support", url=f"https://t.me/{SUPPORT_GROUP}"),[m
+             ],[m
+             [[m
+[31m-                InlineKeyboardButton(f"➕ {sc('add to group')}", url=f"https://t.me/{_uname(context)}?startgroup=start"),[m
+[31m-                InlineKeyboardButton(f"📢 {sc('support')}", url="https://t.me/OliviaBotz"),[m
+[32m+[m[32m                InlineKeyboardButton("Add to Group", url=f"https://t.me/{uname}?startgroup=start"),[m
+             ],[m
+         ])[m
+[31m-        await query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)[m
+[32m+[m[32m        await query.edit_message_text([m
+[32m+[m[32m            PM_START_TEXT, parse_mode=ParseMode.HTML, reply_markup=kb,[m
+[32m+[m[32m        )[m
+         return[m
+ [m
+[31m-    # ── help:close → delete the help message ─────────────────────────────────[m
+[31m-    if data == "help:close":[m
+[31m-        try:[m
+[31m-            await query.message.delete()[m
+[31m-        except Exception:[m
+[31m-            pass[m
+[32m+[m[32m    # ── help:main → main help page ────────────────────────────────────────[m
+[32m+[m[32m    if data == "help:main":[m
+[32m+[m[32m        await query.edit_message_text([m
+[32m+[m[32m            HELP_HEADER, parse_mode=ParseMode.HTML,[m
+[32m+[m[32m            reply_markup=main_menu_keyboard(),[m
+[32m+[m[32m        )[m
+[32m+[m[32m        return[m
+[32m+[m
+[32m+[m[32m    # ── help:<MOD> → module sub-menu ──────────────────────────────────────[m
+[32m+[m[32m    if data.startswith("help:"):[m
+[32m+[m[32m        mod_name = data.split(":", 1)[1].upper()[m
+[32m+[m[32m        if mod_name in MODULES:[m
+[32m+[m[32m            text = get_module_header(mod_name)[m
+[32m+[m[32m            kb = module_help_keyboard(mod_name)[m
+[32m+[m[32m            await query.edit_message_text([m
+[32m+[m[32m                text, parse_mode=ParseMode.HTML, reply_markup=kb,[m
+[32m+[m[32m            )[m
+[32m+[m[32m        return[m
+[32m+[m
+[32m+[m[32m    # ── cmd:<MOD>:<CMD> → command detail ──────────────────────────────────[m
+[32m+[m[32m    if data.startswith("cmd:"):[m
+[32m+[m[32m        parts = data.split(":", 2)[m
+[32m+[m[32m        if len(parts) == 3:[m
+[32m+[m[32m            mod_name, cmd_name = parts[1], parts[2][m
+[32m+[m[32m            detail = get_command_detail(mod_name, cmd_name)[m
+[32m+[m[32m            if detail:[m
+[32m+[m[32m                label = MODULES.get(mod_name, {}).get("label", mod_name)[m
+[32m+[m[32m                text = ([m
+[32m+[m[32m                    f"<b>{label} — /{cmd_name}</b>\n\n"[m
+[32m+[m[32m                    f"{html.escape(detail)}"[m
+[32m+[m[32m                )[m
+[32m+[m[32m                kb = command_detail_keyboard(mod_name)[m
+[32m+[m[32m                await query.edit_message_text([m
+[32m+[m[32m                    text, parse_mode=ParseMode.HTML, reply_markup=kb,[m
+[32m+[m[32m                )[m
+         return[m
+ [m
+[31m-    # ── no-op for page indicator buttons ─────────────────────────────────────[m
+[32m+[m[32m    # ── noop ──────────────────────────────────────────────────────────────[m
+     if data == ".":[m
+         return[m
+ [m
+[36m@@ -241,22 +256,26 @@[m [masync def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) ->[m
+ [m
+ async def cmd_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+     msg = update.effective_message[m
+[31m-    user = update.effective_user[m
+     chat = update.effective_chat[m
+[31m-    if not msg or not user or not chat:[m
+[32m+[m[32m    user = update.effective_user[m
+[32m+[m[32m    if not msg or not user:[m
+         return[m
+ [m
+[31m-    lines = [][m
+[31m-    if chat.type == "private":[m
+[31m-        lines.append(f"👤 {sc('your id')}: <code>{user.id}</code>")[m
+[32m+[m[32m    if msg.reply_to_message:[m
+[32m+[m[32m        target = msg.reply_to_message.from_user[m
+[32m+[m[32m        if target:[m
+[32m+[m[32m            text = ([m
+[32m+[m[32m                f"<b>{html.escape(target.first_name)}</b>'s ID: "[m
+[32m+[m[32m                f"<code>{target.id}</code>"[m
+[32m+[m[32m            )[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            text = "Could not get user info."[m
+     else:[m
+[31m-        lines.append(f"💬 {sc('chat id')}: <code>{chat.id}</code>")[m
+[31m-        lines.append(f"👤 {sc('your id')}: <code>{user.id}</code>")[m
+[31m-        if msg.reply_to_message and msg.reply_to_message.from_user:[m
+[31m-            t = msg.reply_to_message.from_user[m
+[31m-            lines.append(f"🔎 {sc('replied user')}: <b>{html.escape(t.full_name)}</b> — <code>{t.id}</code>")[m
+[32m+[m[32m        text = f"Your ID: <code>{user.id}</code>"[m
+[32m+[m[32m        if chat and chat.type != "private":[m
+[32m+[m[32m            text += f"\nChat ID: <code>{chat.id}</code>"[m
+ [m
+[31m-    await msg.reply_text("\n".join(lines), parse_mode=ParseMode.HTML)[m
+[32m+[m[32m    await msg.reply_text(text, parse_mode=ParseMode.HTML)[m
+ [m
+ [m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+[36m@@ -264,16 +283,10 @@[m [masync def cmd_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+ [m
+ async def cmd_ping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+[31m-    msg = update.effective_message[m
+[31m-    if not msg:[m
+[31m-        return[m
+[31m-    t0 = time.perf_counter()[m
+[31m-    sent = await msg.reply_text(f"🏓 {sc('pinging')}...")[m
+[31m-    ms = (time.perf_counter() - t0) * 1000[m
+[31m-    await sent.edit_text([m
+[31m-        f"🏓 {sc('pong')}!\n⚡ {sc('latency')}: <code>{ms:.1f} ms</code>",[m
+[31m-        parse_mode=ParseMode.HTML,[m
+[31m-    )[m
+[32m+[m[32m    start = time.monotonic()[m
+[32m+[m[32m    sent = await update.effective_message.reply_text("Pong!")[m
+[32m+[m[32m    ms = (time.monotonic() - start) * 1000[m
+[32m+[m[32m    await sent.edit_text(f"Pong! <code>{ms:.0f}ms</code>", parse_mode=ParseMode.HTML)[m
+ [m
+ [m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+[36m@@ -282,17 +295,79 @@[m [masync def cmd_ping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+ [m
+ async def cmd_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+     text = ([m
+[31m-        f"<b>🛡️ ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ</b>\n\n"[m
+[31m-        f"🐍 {sc('language')}: Python 3.11+\n"[m
+[31m-        f"📦 {sc('framework')}: python-telegram-bot\n"[m
+[31m-        f"🗄️ {sc('database')}: MongoDB\n"[m
+[31m-        f"👑 {sc('owner')}: <b>𝐒𝐄𝐂𝐑𝐄𝐓</b> (@its_me_secret)\n"[m
+[31m-        f"📢 {sc('support')}: @OliviaBotz\n"[m
+[31m-        f"🤖 {sc('bot')}: @OliviaManagementBot\n"[m
+[32m+[m[32m        "<b>🌹 Rose</b>\n\n"[m
+[32m+[m[32m        "🐍 Language: Python 3.11+\n"[m
+[32m+[m[32m        "📦 Framework: python-telegram-bot\n"[m
+[32m+[m[32m        "🗄 Database: MongoDB\n"[m
+[32m+[m[32m        f"👑 Owner: <b>𝐒𝐄𝐂𝐑𝐄𝐓</b> (@its_me_secret)\n"[m
+[32m+[m[32m        f"📢 Support: @{SUPPORT_GROUP}\n"[m
+[32m+[m[32m        "🤖 Bot: @RoseManagementBot\n"[m
+     )[m
+     await update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)[m
+ [m
+ [m
+[32m+[m[32m# ═══════════════════════════════════════════════════════════════════════════════[m
+[32m+[m[32m# /setcommands — register with BotFather (owner only)[m
+[32m+[m[32m# ═══════════════════════════════════════════════════════════════════════════════[m
+[32m+[m
+[32m+[m[32masync def cmd_setcommands(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:[m
+[32m+[m[32m    user = update.effective_user[m
+[32m+[m[32m    if not user or user.id != OWNER_ID:[m
+[32m+[m[32m        await update.effective_message.reply_text("❌ Owner only.")[m
+[32m+[m[32m        return[m
+[32m+[m
+[32m+[m[32m    commands = [[m
+[32m+[m[32m        BotCommand("start", "Start the bot"),[m
+[32m+[m[32m        BotCommand("help", "Get help"),[m
+[32m+[m[32m        BotCommand("id", "Get user/chat ID"),[m
+[32m+[m[32m        BotCommand("ping", "Check bot latency"),[m
+[32m+[m[32m        BotCommand("about", "About this bot"),[m
+[32m+[m[32m        BotCommand("ban", "Ban a user"),[m
+[32m+[m[32m        BotCommand("tban", "Temp ban a user"),[m
+[32m+[m[32m        BotCommand("unban", "Unban a user"),[m
+[32m+[m[32m        BotCommand("kick", "Kick a user"),[m
+[32m+[m[32m        BotCommand("mute", "Mute a user"),[m
+[32m+[m[32m        BotCommand("tmute", "Temp mute a user"),[m
+[32m+[m[32m        BotCommand("unmute", "Unmute a user"),[m
+[32m+[m[32m        BotCommand("warn", "Warn a user"),[m
+[32m+[m[32m        BotCommand("unwarn", "Remove last warning"),[m
+[32m+[m[32m        BotCommand("warns", "View user warnings"),[m
+[32m+[m[32m        BotCommand("warnlimit", "Set warn limit"),[m
+[32m+[m[32m        BotCommand("promote", "Promote to admin"),[m
+[32m+[m[32m        BotCommand("demote", "Demote an admin"),[m
+[32m+[m[32m        BotCommand("adminlist", "List all admins"),[m
+[32m+[m[32m        BotCommand("pin", "Pin a message"),[m
+[32m+[m[32m        BotCommand("unpin", "Unpin a message"),[m
+[32m+[m[32m        BotCommand("purge", "Bulk delete messages"),[m
+[32m+[m[32m        BotCommand("filter", "Set a filter"),[m
+[32m+[m[32m        BotCommand("filters", "List all filters"),[m
+[32m+[m[32m        BotCommand("save", "Save a note"),[m
+[32m+[m[32m        BotCommand("notes", "List all notes"),[m
+[32m+[m[32m        BotCommand("rules", "View group rules"),[m
+[32m+[m[32m        BotCommand("setrules", "Set group rules"),[m
+[32m+[m[32m        BotCommand("setwelcome", "Set welcome message"),[m
+[32m+[m[32m        BotCommand("welcome", "Toggle welcome"),[m
+[32m+[m[32m        BotCommand("lock", "Lock a permission"),[m
+[32m+[m[32m        BotCommand("unlock", "Unlock a permission"),[m
+[32m+[m[32m        BotCommand("locks", "View lock status"),[m
+[32m+[m[32m        BotCommand("setflood", "Set flood limit"),[m
+[32m+[m[32m        BotCommand("report", "Report to admins"),[m
+[32m+[m[32m        BotCommand("approve", "Approve a user"),[m
+[32m+[m[32m        BotCommand("approved", "List approved users"),[m
+[32m+[m[32m        BotCommand("captcha", "Toggle CAPTCHA"),[m
+[32m+[m[32m        BotCommand("antiraid", "Toggle anti-raid"),[m
+[32m+[m[32m        BotCommand("connect", "Connect from PM"),[m
+[32m+[m[32m        BotCommand("info", "User information"),[m
+[32m+[m[32m        BotCommand("stats", "Bot statistics"),[m
+[32m+[m[32m    ][m
+[32m+[m
+[32m+[m[32m    await context.bot.set_my_commands(commands)[m
+[32m+[m[32m    await update.effective_message.reply_text([m
+[32m+[m[32m        f"✅ Registered <b>{len(commands)}</b> commands with BotFather.",[m
+[32m+[m[32m        parse_mode=ParseMode.HTML,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+ # Handler registration[m
+ # ═══════════════════════════════════════════════════════════════════════════════[m
+[36m@@ -303,11 +378,8 @@[m [mdef register_handlers(app: Application) -> None:[m
+     app.add_handler(CommandHandler("id", cmd_id))[m
+     app.add_handler(CommandHandler("ping", cmd_ping))[m
+     app.add_handler(CommandHandler("about", cmd_about))[m
+[31m-[m
+[31m-    # single router for ALL callback patterns[m
+[32m+[m[32m    app.add_handler(CommandHandler("setcommands", cmd_setcommands))[m
+     app.add_handler(CallbackQueryHandler([m
+[31m-        callback_router,[m
+[31m-        pattern=r"^(help:|start:|cmd:|\.)",[m
+[32m+[m[32m        _callback_handler,[m
+[32m+[m[32m        pattern=r"^(help:|cmd:|start:)",[m
+     ))[m
+[31m-[m
+[31m-    logger.info("start.py handlers registered.")[m
+[1mdiff --git a/render.yaml b/render.yaml[m
+[1mindex d1f5268..e3dd9c6 100644[m
+[1m--- a/render.yaml[m
+[1m+++ b/render.yaml[m
+[36m@@ -1,6 +1,6 @@[m
+ services:[m
+   - type: worker[m
+[31m-    name: guardianbot[m
+[32m+[m[32m    name: rose[m
+     runtime: docker[m
+     dockerfilePath: ./Dockerfile[m
+     plan: free[m
+[36m@@ -14,7 +14,7 @@[m [mservices:[m
+       - key: OWNER_ID[m
+         sync: false[m
+       - key: BOT_NAME[m
+[31m-        value: ɢᴜᴀʀᴅɪᴀɴʙᴏᴛ[m
+[32m+[m[32m        value: Rose[m
+       - key: WARN_LIMIT[m
+         value: "3"[m
+     autoDeploy: true[m
